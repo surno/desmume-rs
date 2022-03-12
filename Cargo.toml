@@ -1,0 +1,24 @@
+[package]
+name = "desmume"
+version = "1.0.0"
+authors = ["Marco 'Capypara' Köpcke <hello@capypara.de>"]
+edition = "2021"
+repository = "https://github.com/SkyTemple/rs-desmume"
+license = "GPL-3.0-or-later"
+description = "Rust bindings for DeSmuME, the Nintendo DS emulator."
+links = "desmume"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+# Enable this feature or set the env variable DESMUME_SYSTEM
+# to skip building DeSmuME itself. It must be present on the system then.
+desmume-system = []
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+glob = "0.3"
+tempfile = "3.3"

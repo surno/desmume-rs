@@ -1,0 +1,96 @@
+name: Build, test and publish
+
+on: [push, pull_request]
+
+jobs:
+  build_linux:
+    runs-on: ubuntu-latest
+    name: Build Linux
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+  build_macos_windows:
+    runs-on: ${{ matrix.os }}
+    name: Build Mac/Windows
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2019
+            target: i686-pc-windows-msvc
+          - os: windows-2019
+            target: x86_64-pc-windows-msvc
+          - os: macos-10.15
+            target: x86_64-apple-darwin
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install MacOS build deps
+        if: matrix.os == 'macos-10.15'
+        run: |
+          brew install coreutils gcc sdl2 meson glib
+      - name: Add msbuild to PATH
+        if: matrix.os == 'windows-2019'
+        uses: microsoft/setup-msbuild@v1.0.2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: ${{ matrix.target }}
+          override: true
+          default: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+        env:
+          TARGET: ${{ matrix.target }}
+          FASTBUILD: "1"
+  build_mingw:
+    runs-on: windows-2019
+    name: Build Windows GNU
+    strategy:
+      fail-fast: false
+      matrix:
+        include: [
+          { msystem: MINGW64, arch: x86_64, path: mingw64, target: x86_64-pc-windows-gnu },
+          { msystem: MINGW32, arch: i686, path: mingw32, target: i686-pc-windows-gnu }
+        ]
+    steps:
+      - name: Install MSys2 and dependencies
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          msystem: ${{ matrix.msystem }}
+          install: >-
+            git
+            unzip
+            mingw-w64-${{ matrix.arch }}-curl
+            mingw-w64-${{ matrix.arch }}-openssl
+            mingw-w64-${{ matrix.arch }}-toolchain
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Add VS to path
+        shell: msys2 {0}
+        run: |
+          echo "/c/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin" >> $GITHUB_PATH
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          target: ${{ matrix.target }}
+          override: true
+          default: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release
+        env:
+          TARGET: ${{ matrix.target }}
+          FASTBUILD: "1"
