@@ -1,8 +1,6 @@
 use std::env;
-use std::ffi::OsString;
-use std::fs;
 use std::io::ErrorKind;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::Command;
 use tempfile::TempDir;
 
@@ -26,7 +24,6 @@ fn main() {
         return;
     }
 
-    let host = env::var("HOST").unwrap();
     let src = env::current_dir().unwrap();
     let build_dir = TempDir::new().unwrap();
     let build_dir = build_dir.path();
@@ -68,12 +65,24 @@ fn main() {
         let mut cmd = Command::new("cp");
         cmd.current_dir(&build_dir)
             .arg(dll_path)
-            .arg(&dst.join("libdesmume.dll"));
+            .arg(&dst.join("desmume.dll"));
+        let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+        let lib_path = glob::glob(&build_dir.join("src/frontend/interface/windows/__bins/*.lib").to_str().unwrap())
+            .unwrap()
+            .next()
+            .unwrap()
+            .unwrap();
+        let mut cmd = Command::new("cp");
+        cmd.current_dir(&build_dir)
+            .arg(lib_path)
+            .arg(&dst.join("desmume.lib"));
         run(&mut cmd, "cp");
+        let mut cmd = Command::new("cp");
         cmd.current_dir(&build_dir)
             .arg(&build_dir.join(format!("src/frontend/interface/windows/SDL/lib/{}/SDL2.dll", arch_dirname)))
             .arg(&dst);
         run(&mut cmd, "cp");
+        println!("cargo:rustc-link-search={}", dst.as_os_str().to_str().unwrap())
     } else {
         // Meson based Linux/Mac build
         let mut cmd = Command::new("meson");
@@ -104,7 +113,6 @@ fn main() {
             .arg(&dst);
         run(&mut cmd, "cp");
     }
-    //println!("cargo:rustc-link-lib=dylib=desmume");
 }
 
 fn run(cmd: &mut Command, program: &str) {

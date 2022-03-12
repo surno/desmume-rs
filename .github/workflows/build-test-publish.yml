@@ -9,6 +9,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
+      - name: Install meson, SDL, etc.
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3 python3-pip python3-setuptools python3-wheel ninja-build libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev
+          sudo pip3 install meson
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
@@ -33,6 +40,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Install MacOS build deps
         if: matrix.os == 'macos-10.15'
         run: |
@@ -77,10 +86,12 @@ jobs:
             mingw-w64-${{ matrix.arch }}-toolchain
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          submodules: recursive
       - name: Add VS to path
-        shell: msys2 {0}
+        shell: powershell
         run: |
-          echo "/c/Program Files (x86)/Microsoft Visual Studio/2019/Enterprise/MSBuild/Current/Bin" >> $GITHUB_PATH
+          echo "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
