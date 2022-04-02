@@ -1,13 +1,20 @@
-use libc::{c_char, c_int, c_long, c_schar, c_short, c_uchar, c_uint, c_ulong, c_ushort};
+pub use libc::{c_char, c_int, c_long, c_schar, c_short, c_uchar, c_uint, c_ulong, c_ushort};
 
 #[allow(non_camel_case_types)]
-pub type c_bool = bool;
+pub type c_bool = c_int;
 
-pub type MemoryCbFnc = Option<unsafe extern "C" fn(addr: c_uint, size: c_int) -> c_bool>;
+pub type MemoryCbFnc = Option<extern "C" fn(addr: c_uint, size: c_int) -> c_bool>;
 #[repr(u32)]
 pub enum StartFrom {
     Blank = 0, SRAM = 1, Savestate = 2
 }
+
+pub const GPU_FRAMEBUFFER_NATIVE_WIDTH: usize = 256;
+pub const GPU_FRAMEBUFFER_NATIVE_HEIGHT: usize = 192;
+// The framebuffer *may* be bigger (more pages etc.) but this is the only relevant parts of it.
+// Also yes this constant is defined is a bit weird, but I just took it from the DeSmuME source
+// (see _displayInfo.framebufferPageSize = ... in GPU.cpp).
+pub const FRAMEBUFFER_SIZE: usize = ((GPU_FRAMEBUFFER_NATIVE_WIDTH * GPU_FRAMEBUFFER_NATIVE_HEIGHT) + (GPU_FRAMEBUFFER_NATIVE_WIDTH * GPU_FRAMEBUFFER_NATIVE_HEIGHT)) * 2;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -66,6 +73,7 @@ extern "C" {
 
     pub fn desmume_draw_raw_as_rgbx(buffer: *mut u8);
 
+    #[allow(unused)]
     pub fn desmume_savestate_clear();
 
     pub fn desmume_savestate_load(file_name: *const c_char) -> c_bool;
@@ -118,9 +126,13 @@ extern "C" {
 
     pub fn desmume_memory_write_long(address: c_int, value: c_ulong);
 
-    pub fn desmume_memory_read_register(register_name: *mut c_char) -> c_int;
+    pub fn desmume_memory_read_register(register_name: *mut c_char) -> u32;
 
-    pub fn desmume_memory_write_register(register_name: *mut c_char, value: c_long);
+    pub fn desmume_memory_write_register(register_name: *mut c_char, value: u32);
+
+    pub fn desmume_memory_get_next_instruction() -> u32;
+
+    pub fn desmume_memory_set_next_instruction(value: u32);
 
     pub fn desmume_memory_register_write(address: c_int, size: c_int, cb: MemoryCbFnc);
 
@@ -128,6 +140,7 @@ extern "C" {
 
     pub fn desmume_memory_register_exec(address: c_int, size: c_int, cb: MemoryCbFnc);
 
+    #[allow(unused)]
     pub fn desmume_screenshot(screenshot_buffer: *mut c_char);
 
     pub fn desmume_input_joy_init() -> c_bool;
@@ -172,6 +185,7 @@ extern "C" {
 
     pub fn desmume_movie_play(file_name: *const c_char) -> *const c_char;
 
+    #[allow(unused)]
     pub fn desmume_movie_record_simple(save_file_name: *const c_char, author_name: *const c_char);
 
     pub fn desmume_movie_record(
@@ -189,6 +203,7 @@ extern "C" {
         date: SimpleDate,
     );
 
+    #[allow(unused)]
     pub fn desmume_movie_replay();
 
     pub fn desmume_movie_stop();

@@ -88,6 +88,7 @@ fn main() {
         let mut cmd = Command::new("meson");
         cmd
             .arg("build")
+            .arg("-Dbuildtype=release")
             .current_dir(&build_dir.join("src/frontend/interface"));
         run(&mut cmd, "meson");
 
@@ -112,6 +113,10 @@ fn main() {
             .arg(&build_dir.join("src/frontend/interface/build/libdesmume.so"))
             .arg(&dst);
         run(&mut cmd, "cp");
+
+        println!("cargo:rustc-link-search=native={}", dst.display());
+        println!("cargo:lib={}", dst.display());
+
     }
 }
 
