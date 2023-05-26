@@ -60,7 +60,8 @@ impl DeSmuMEInput {
     /// Joysticks must be initialized.
     pub fn joy_set_key(&mut self, index: u16, joystick_key_index: i32) -> Result<(), DeSmuMEError> {
         if self.joystick_was_init {
-            Ok(unsafe { desmume_input_joy_set_key(index as c_int, joystick_key_index as c_int) })
+            unsafe { desmume_input_joy_set_key(index as c_int, joystick_key_index as c_int) };
+            Ok(())
         } else {
             Err(DeSmuMEError::JoystickNotInit)
         }
@@ -157,12 +158,12 @@ pub enum Key {
 
 #[inline(always)]
 fn add_key(keypad: u16, keymask: u16) -> u16 {
-    keypad | keymask as u16
+    keypad | keymask
 }
 
 #[inline(always)]
 fn rm_key(keypad: u16, keymask: u16) -> u16 {
-    keypad & !keymask as u16
+    keypad & !keymask
 }
 
 pub fn keymask(k: Key) -> u16 {

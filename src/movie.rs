@@ -14,7 +14,7 @@ impl DeSmuMEMovie {
             let err_raw = desmume_movie_play(CString::new(file_name)?.as_ptr());
             if !err_raw.is_null() {
                 let err = CStr::from_ptr(err_raw).to_str().unwrap();
-                if err != "" {
+                if !err.is_empty() {
                     return Err(DeSmuMEError::MoviePlayError(err.to_owned()));
                 }
             }
@@ -100,7 +100,8 @@ impl DeSmuMEMovie {
     /// Returns an error if no movie is active.
     pub fn set_rerecord_count(&self, count: isize) -> Result<(), DeSmuMEError> {
         if self.is_active() {
-            Ok(unsafe { desmume_movie_set_rerecord_count(count as c_int) })
+            unsafe { desmume_movie_set_rerecord_count(count as c_int) };
+            Ok(())
         } else {
             Err(DeSmuMEError::NoMovieActive)
         }
@@ -118,7 +119,8 @@ impl DeSmuMEMovie {
     /// Returns an error if no movie is active.
     pub fn set_readonly(&self, state: bool) -> Result<(), DeSmuMEError> {
         if self.is_active() {
-            Ok(unsafe { desmume_movie_set_readonly(state as c_bool) })
+            unsafe { desmume_movie_set_readonly(state as c_bool) };
+            Ok(())
         } else {
             Err(DeSmuMEError::NoMovieActive)
         }

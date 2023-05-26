@@ -5,7 +5,7 @@ use std::process::Command;
 use tempfile::TempDir;
 
 fn env(name: &str) -> Option<String> {
-    let prefix = env::var("TARGET").unwrap().to_uppercase().replace("-", "_");
+    let prefix = env::var("TARGET").unwrap().to_uppercase().replace('-', "_");
     let prefixed = format!("{}_{}", prefix, name);
     println!("cargo:rerun-if-env-changed={}", prefixed);
 
@@ -30,10 +30,10 @@ fn main() {
 
     // Copy sources over
     let mut cmd = Command::new("cp");
-    cmd.current_dir(&build_dir)
+    cmd.current_dir(build_dir)
         .arg("-a")
         .arg(&src.join("desmume/desmume/src"))
-        .arg(&build_dir);
+        .arg(build_dir);
     run(&mut cmd, "cp");
 
     if target.contains("windows") {
@@ -57,7 +57,7 @@ fn main() {
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
         let dll_path = glob::glob(
-            &build_dir
+            build_dir
                 .join("src/frontend/interface/windows/__bins/*.dll")
                 .to_str()
                 .unwrap(),
@@ -67,12 +67,12 @@ fn main() {
         .unwrap()
         .unwrap();
         let mut cmd = Command::new("cp");
-        cmd.current_dir(&build_dir)
+        cmd.current_dir(build_dir)
             .arg(dll_path)
             .arg(&dst.join("desmume.dll"));
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
         let lib_path = glob::glob(
-            &build_dir
+            build_dir
                 .join("src/frontend/interface/windows/__bins/*.lib")
                 .to_str()
                 .unwrap(),
@@ -82,12 +82,12 @@ fn main() {
         .unwrap()
         .unwrap();
         let mut cmd = Command::new("cp");
-        cmd.current_dir(&build_dir)
+        cmd.current_dir(build_dir)
             .arg(lib_path)
             .arg(&dst.join("desmume.lib"));
         run(&mut cmd, "cp");
         let mut cmd = Command::new("cp");
-        cmd.current_dir(&build_dir)
+        cmd.current_dir(build_dir)
             .arg(&build_dir.join(format!(
                 "src/frontend/interface/windows/SDL/lib/{}/SDL2.dll",
                 arch_dirname
@@ -114,7 +114,7 @@ fn main() {
 
         if target.contains("apple-darwin") {
             let mut cmd = Command::new("mv");
-            cmd.current_dir(&build_dir)
+            cmd.current_dir(build_dir)
                 .arg(&build_dir.join("src/frontend/interface/build/libdesmume.dylib"))
                 .arg(&build_dir.join("src/frontend/interface/build/libdesmume.so"));
             run(&mut cmd, "mv");
@@ -122,7 +122,7 @@ fn main() {
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
         let mut cmd = Command::new("cp");
-        cmd.current_dir(&build_dir)
+        cmd.current_dir(build_dir)
             .arg(&build_dir.join("src/frontend/interface/build/libdesmume.so"))
             .arg(&dst);
         run(&mut cmd, "cp");

@@ -92,13 +92,13 @@ impl_read_write_access!(
 /// A tiny wrapper to work around Rust's orphan rules limitations for the Index/IndexMut implementations of the readers and writers.
 /// Not pretty, but you can pretty much just full-transparently ignore this type. See [`TypedMemoryAccessor`] and [`TypedMemoryWriter`] instead.
 pub struct MemIndexWrapper<T, U>(pub(crate) T, pub(crate) PhantomData<U>);
-impl<'a, T, U> Deref for MemIndexWrapper<T, U> {
+impl<T, U> Deref for MemIndexWrapper<T, U> {
     type Target = T;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
-impl<'a, T, U> DerefMut for MemIndexWrapper<T, U> {
+impl<T, U> DerefMut for MemIndexWrapper<T, U> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
@@ -111,7 +111,7 @@ where
     type Output = T;
 
     fn index_move(&self, index: u32) -> Self::Output {
-        unsafe { self.read(index) }
+        self.read(index)
     }
 }
 
@@ -122,7 +122,7 @@ where
     type Output = Vec<T>;
 
     fn index_move(&self, index: Range<u32>) -> Self::Output {
-        unsafe { self.read_range(index.start, index.end - 1) }
+        self.read_range(index.start, index.end - 1)
     }
 }
 
@@ -133,7 +133,7 @@ where
     type Output = Vec<T>;
 
     fn index_move(&self, index: RangeFrom<u32>) -> Self::Output {
-        unsafe { self.read_range(index.start, END_OF_MEMORY) }
+        self.read_range(index.start, END_OF_MEMORY)
     }
 }
 
@@ -144,7 +144,7 @@ where
     type Output = Vec<T>;
 
     fn index_move(&self, _index: RangeFull) -> Self::Output {
-        unsafe { self.read_range(START_OF_MEMORY, END_OF_MEMORY) }
+        self.read_range(START_OF_MEMORY, END_OF_MEMORY)
     }
 }
 
@@ -155,7 +155,7 @@ where
     type Output = Vec<T>;
 
     fn index_move(&self, index: RangeInclusive<u32>) -> Self::Output {
-        unsafe { self.read_range(*index.start(), *index.end()) }
+        self.read_range(*index.start(), *index.end())
     }
 }
 
@@ -166,7 +166,7 @@ where
     type Output = Vec<T>;
 
     fn index_move(&self, index: RangeTo<u32>) -> Self::Output {
-        unsafe { self.read_range(START_OF_MEMORY, index.end - 1) }
+        self.read_range(START_OF_MEMORY, index.end - 1)
     }
 }
 
@@ -177,7 +177,7 @@ where
     type Output = Vec<T>;
 
     fn index_move(&self, index: RangeToInclusive<u32>) -> Self::Output {
-        unsafe { self.read_range(START_OF_MEMORY, index.end) }
+        self.read_range(START_OF_MEMORY, index.end)
     }
 }
 
@@ -186,7 +186,7 @@ where
     U: MemoryReadAccess<T> + MemoryWriteAccess<T>,
 {
     fn index_set(&mut self, index: u32, value: &Self::Output) {
-        unsafe { self.write(index, *value) }
+        self.write(index, *value)
     }
 }
 
@@ -195,7 +195,7 @@ where
     U: MemoryReadAccess<T> + MemoryWriteAccess<T>,
 {
     fn index_set(&mut self, index: Range<u32>, value: &Self::Output) {
-        unsafe { self.write_range(index.start, index.end - 1, value) }
+        self.write_range(index.start, index.end - 1, value)
     }
 }
 
@@ -204,7 +204,7 @@ where
     U: MemoryReadAccess<T> + MemoryWriteAccess<T>,
 {
     fn index_set(&mut self, index: RangeFrom<u32>, value: &Self::Output) {
-        unsafe { self.write_range(index.start, END_OF_MEMORY, value) }
+        self.write_range(index.start, END_OF_MEMORY, value)
     }
 }
 
@@ -213,7 +213,7 @@ where
     U: MemoryReadAccess<T> + MemoryWriteAccess<T>,
 {
     fn index_set(&mut self, _index: RangeFull, value: &Self::Output) {
-        unsafe { self.write_range(START_OF_MEMORY, END_OF_MEMORY, value) }
+        self.write_range(START_OF_MEMORY, END_OF_MEMORY, value)
     }
 }
 
@@ -222,7 +222,7 @@ where
     U: MemoryReadAccess<T> + MemoryWriteAccess<T>,
 {
     fn index_set(&mut self, index: RangeInclusive<u32>, value: &Self::Output) {
-        unsafe { self.write_range(*index.start(), *index.end(), value) }
+        self.write_range(*index.start(), *index.end(), value)
     }
 }
 
@@ -231,7 +231,7 @@ where
     U: MemoryReadAccess<T> + MemoryWriteAccess<T>,
 {
     fn index_set(&mut self, index: RangeTo<u32>, value: &Self::Output) {
-        unsafe { self.write_range(START_OF_MEMORY, index.end - 1, value) }
+        self.write_range(START_OF_MEMORY, index.end - 1, value)
     }
 }
 
@@ -240,6 +240,6 @@ where
     U: MemoryReadAccess<T> + MemoryWriteAccess<T>,
 {
     fn index_set(&mut self, index: RangeToInclusive<u32>, value: &Self::Output) {
-        unsafe { self.write_range(START_OF_MEMORY, index.end, value) }
+        self.write_range(START_OF_MEMORY, index.end, value)
     }
 }

@@ -4,7 +4,9 @@ pub use libc::{c_char, c_int, c_long, c_schar, c_short, c_uchar, c_uint, c_ulong
 pub type c_bool = c_int;
 
 pub type MemoryCbFnc = Option<extern "C" fn(addr: c_uint, size: c_int) -> c_bool>;
+
 #[repr(u32)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum StartFrom {
     Blank = 0,
     SRAM = 1,
