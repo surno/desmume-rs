@@ -1,14 +1,15 @@
-mod read;
 mod index;
+mod read;
 
-use std::marker::PhantomData;
-use crate::ffi::*;
 pub use crate::ffi::MemoryCbFnc;
-pub use crate::mem::index::{IndexSet, IndexMove};
+use crate::ffi::*;
+pub use crate::mem::index::{IndexMove, IndexSet};
 pub use crate::mem::read::{MemIndexWrapper, TypedMemoryReader, TypedMemoryWriter};
+use std::marker::PhantomData;
 
 pub enum Processor {
-    Arm9, Arm7
+    Arm9,
+    Arm7,
 }
 
 impl Processor {
@@ -22,10 +23,27 @@ impl Processor {
 
 #[non_exhaustive]
 pub enum Register {
-    R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11, R12, R13, R14, R15, CPSR, SPSR,
+    R0,
+    R1,
+    R2,
+    R3,
+    R4,
+    R5,
+    R6,
+    R7,
+    R8,
+    R9,
+    R10,
+    R11,
+    R12,
+    R13,
+    R14,
+    R15,
+    CPSR,
+    SPSR,
     SP, // Alias for R13
     LR, // Alias for R14
-    PC  // Alias for R15
+    PC, // Alias for R15
 }
 
 impl Register {
@@ -52,7 +70,7 @@ impl Register {
 
             Register::SP => "r13",
             Register::LR => "r14",
-            Register::PC => "r15"
+            Register::PC => "r15",
         }
     }
 }
@@ -192,21 +210,21 @@ impl DeSmuMEMemory {
     pub fn get_reg(&self, processor: Processor, reg: Register) -> u32 {
         let mut bytes = format!("{}.{}", processor.get_name(), reg.get_name()).into_bytes();
         bytes.push(0);
-        let mut cchars = bytes.into_iter().map(|b| b as c_char).collect::<Vec<c_char>>();
-        unsafe {
-            desmume_memory_read_register(cchars.as_mut_ptr())
-        }
+        let mut cchars = bytes
+            .into_iter()
+            .map(|b| b as c_char)
+            .collect::<Vec<c_char>>();
+        unsafe { desmume_memory_read_register(cchars.as_mut_ptr()) }
     }
 
     pub fn set_reg(&mut self, processor: Processor, reg: Register, value: u32) {
         let mut bytes = format!("{}.{}", processor.get_name(), reg.get_name()).into_bytes();
         bytes.push(0);
-        let mut cchars = bytes.into_iter().map(|b| b as c_char).collect::<Vec<c_char>>();
-        unsafe {
-            desmume_memory_write_register(
-                cchars.as_mut_ptr(), value
-            )
-        }
+        let mut cchars = bytes
+            .into_iter()
+            .map(|b| b as c_char)
+            .collect::<Vec<c_char>>();
+        unsafe { desmume_memory_write_register(cchars.as_mut_ptr(), value) }
     }
 
     pub fn get_next_instruction(&self) -> u32 {

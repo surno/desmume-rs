@@ -1,7 +1,7 @@
+use crate::ffi::*;
+use crate::DeSmuMEError;
 use std::ffi::{CStr, CString};
 use std::marker::PhantomData;
-use crate::DeSmuMEError;
-use crate::ffi::*;
 
 /// Load and save savestates. Either slots can be used  (maximum number of slots is in the
 /// constant `NB_STATES`), or savestates can be directly loaded from / saved to files.

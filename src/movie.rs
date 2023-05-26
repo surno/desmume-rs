@@ -1,8 +1,8 @@
+pub use crate::ffi::SimpleDate;
+use crate::ffi::*;
+use crate::DeSmuMEError;
 use std::ffi::{CStr, CString};
 use std::marker::PhantomData;
-use crate::DeSmuMEError;
-use crate::ffi::*;
-pub use crate::ffi::SimpleDate;
 
 /// Record and play movies.
 pub struct DeSmuMEMovie(pub(crate) PhantomData<()>);
@@ -13,11 +13,9 @@ impl DeSmuMEMovie {
         unsafe {
             let err_raw = desmume_movie_play(CString::new(file_name)?.as_ptr());
             if !err_raw.is_null() {
-                let err = CStr::from_ptr(err_raw)
-                    .to_str()
-                    .unwrap();
+                let err = CStr::from_ptr(err_raw).to_str().unwrap();
                 if err != "" {
-                    return Err(DeSmuMEError::MoviePlayError(err.to_owned()))
+                    return Err(DeSmuMEError::MoviePlayError(err.to_owned()));
                 }
             }
         }
@@ -32,20 +30,20 @@ impl DeSmuMEMovie {
                     CString::new(record_data.file_name)?.as_ptr(),
                     CString::new(record_data.author_name)?.as_ptr(),
                     record_data.start_from,
-                    CString::new(record_data.sram_save)?.as_ptr()
+                    CString::new(record_data.sram_save)?.as_ptr(),
                 ),
                 Some(rtc_data) => desmume_movie_record_from_date(
                     CString::new(record_data.file_name)?.as_ptr(),
                     CString::new(record_data.author_name)?.as_ptr(),
                     record_data.start_from,
                     CString::new(record_data.sram_save)?.as_ptr(),
-                    rtc_data
-                )
+                    rtc_data,
+                ),
             }
         }
         Ok(())
     }
-    
+
     /// Stops the current movie playback.
     pub fn stop(&mut self) {
         unsafe { desmume_movie_stop() }
@@ -138,55 +136,90 @@ pub struct RecordData<'a> {
     /// Filename of the SRAM save to use when starting from SRAM.
     sram_save: &'a str,
     /// Date to set the real-time-clock to, defaults to now.
-    rtc_date: Option<SimpleDate>
+    rtc_date: Option<SimpleDate>,
 }
 
 impl<'a> RecordData<'a> {
     /// Start from reset.
     pub fn new_from_blank(file_name: &'a str, author_name: &'a str) -> Self {
         RecordData {
-            file_name, author_name,
-            start_from: StartFrom::Blank, sram_save: "", rtc_date: None
+            file_name,
+            author_name,
+            start_from: StartFrom::Blank,
+            sram_save: "",
+            rtc_date: None,
         }
     }
 
     /// Start from the given SRAM save name.
-    pub fn new_from_sram(file_name: &'a str, author_name: &'a str, sram_save_name: &'a str) -> Self {
+    pub fn new_from_sram(
+        file_name: &'a str,
+        author_name: &'a str,
+        sram_save_name: &'a str,
+    ) -> Self {
         RecordData {
-            file_name, author_name,
-            start_from: StartFrom::SRAM, sram_save: sram_save_name, rtc_date: None
+            file_name,
+            author_name,
+            start_from: StartFrom::SRAM,
+            sram_save: sram_save_name,
+            rtc_date: None,
         }
     }
 
     /// Start from the first savestate.
     pub fn new_from_savestate(file_name: &'a str, author_name: &'a str) -> Self {
         RecordData {
-            file_name, author_name,
-            start_from: StartFrom::Savestate, sram_save: "", rtc_date: None
+            file_name,
+            author_name,
+            start_from: StartFrom::Savestate,
+            sram_save: "",
+            rtc_date: None,
         }
     }
 
     /// Start from reset, set the RTC before starting.
-    pub fn new_from_blank_with_date(file_name: &'a str, author_name: &'a str, rtc_date: SimpleDate) -> Self {
+    pub fn new_from_blank_with_date(
+        file_name: &'a str,
+        author_name: &'a str,
+        rtc_date: SimpleDate,
+    ) -> Self {
         RecordData {
-            file_name, author_name,
-            start_from: StartFrom::Blank, sram_save: "", rtc_date: Some(rtc_date)
+            file_name,
+            author_name,
+            start_from: StartFrom::Blank,
+            sram_save: "",
+            rtc_date: Some(rtc_date),
         }
     }
 
     /// Start from the given SRAM save name, set the RTC before starting.
-    pub fn new_from_sram_with_date(file_name: &'a str, author_name: &'a str, sram_save_name: &'a str, rtc_date: SimpleDate) -> Self {
+    pub fn new_from_sram_with_date(
+        file_name: &'a str,
+        author_name: &'a str,
+        sram_save_name: &'a str,
+        rtc_date: SimpleDate,
+    ) -> Self {
         RecordData {
-            file_name, author_name,
-            start_from: StartFrom::SRAM, sram_save: sram_save_name, rtc_date: Some(rtc_date)
+            file_name,
+            author_name,
+            start_from: StartFrom::SRAM,
+            sram_save: sram_save_name,
+            rtc_date: Some(rtc_date),
         }
     }
 
     /// Start from the first savestate,  set the RTC before starting.
-    pub fn new_from_savestate_with_date(file_name: &'a str, author_name: &'a str, rtc_date: SimpleDate) -> Self {
+    pub fn new_from_savestate_with_date(
+        file_name: &'a str,
+        author_name: &'a str,
+        rtc_date: SimpleDate,
+    ) -> Self {
         RecordData {
-            file_name, author_name,
-            start_from: StartFrom::Savestate, sram_save: "", rtc_date: Some(rtc_date)
+            file_name,
+            author_name,
+            start_from: StartFrom::Savestate,
+            sram_save: "",
+            rtc_date: Some(rtc_date),
         }
     }
 }

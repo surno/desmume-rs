@@ -49,29 +49,38 @@ fn main() {
         } else {
             ("x86", "Win32")
         };
-        cmd
-            .arg("DeSmuME_Interface.vcxproj")
+        cmd.arg("DeSmuME_Interface.vcxproj")
             .arg(format!("/p:configuration={}", config))
             .arg(format!("/p:Platform={}", arch_targetname))
             .current_dir(&build_dir.join("src/frontend/interface/windows"));
         run(&mut cmd, "meson");
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-        let dll_path = glob::glob(&build_dir.join("src/frontend/interface/windows/__bins/*.dll").to_str().unwrap())
-            .unwrap()
-            .next()
-            .unwrap()
-            .unwrap();
+        let dll_path = glob::glob(
+            &build_dir
+                .join("src/frontend/interface/windows/__bins/*.dll")
+                .to_str()
+                .unwrap(),
+        )
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap();
         let mut cmd = Command::new("cp");
         cmd.current_dir(&build_dir)
             .arg(dll_path)
             .arg(&dst.join("desmume.dll"));
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-        let lib_path = glob::glob(&build_dir.join("src/frontend/interface/windows/__bins/*.lib").to_str().unwrap())
-            .unwrap()
-            .next()
-            .unwrap()
-            .unwrap();
+        let lib_path = glob::glob(
+            &build_dir
+                .join("src/frontend/interface/windows/__bins/*.lib")
+                .to_str()
+                .unwrap(),
+        )
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap();
         let mut cmd = Command::new("cp");
         cmd.current_dir(&build_dir)
             .arg(lib_path)
@@ -79,22 +88,26 @@ fn main() {
         run(&mut cmd, "cp");
         let mut cmd = Command::new("cp");
         cmd.current_dir(&build_dir)
-            .arg(&build_dir.join(format!("src/frontend/interface/windows/SDL/lib/{}/SDL2.dll", arch_dirname)))
+            .arg(&build_dir.join(format!(
+                "src/frontend/interface/windows/SDL/lib/{}/SDL2.dll",
+                arch_dirname
+            )))
             .arg(&dst);
         run(&mut cmd, "cp");
-        println!("cargo:rustc-link-search={}", dst.as_os_str().to_str().unwrap())
+        println!(
+            "cargo:rustc-link-search={}",
+            dst.as_os_str().to_str().unwrap()
+        )
     } else {
         // Meson based Linux/Mac build
         let mut cmd = Command::new("meson");
-        cmd
-            .arg("build")
+        cmd.arg("build")
             .arg("-Dbuildtype=release")
             .current_dir(&build_dir.join("src/frontend/interface"));
         run(&mut cmd, "meson");
 
         let mut cmd = Command::new("ninja");
-        cmd
-            .arg("-C")
+        cmd.arg("-C")
             .arg("build")
             .current_dir(&build_dir.join("src/frontend/interface"));
         run(&mut cmd, "meson");
@@ -116,7 +129,6 @@ fn main() {
 
         println!("cargo:rustc-link-search=native={}", dst.display());
         println!("cargo:lib={}", dst.display());
-
     }
 }
 

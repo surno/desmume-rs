@@ -50,4 +50,3 @@ macro_rules! impl_write_access (
         }
     );
 );
-

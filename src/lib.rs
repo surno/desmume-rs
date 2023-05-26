@@ -1,16 +1,17 @@
+use crate::ffi::*;
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::ptr::slice_from_raw_parts;
-use crate::ffi::*;
-#[macro_use] mod macros;
+#[macro_use]
+mod macros;
 
+mod err;
 mod ffi;
+pub mod input;
 pub mod mem;
 mod movie;
 mod savestate;
-pub mod input;
 mod sdl_window;
-mod err;
 
 pub use crate::err::DeSmuMEError;
 pub use crate::input::DeSmuMEInput;
@@ -36,7 +37,7 @@ pub enum Language {
     French = 2,
     German = 3,
     Italian = 4,
-    Spanish = 5
+    Spanish = 5,
 }
 
 /// The DeSmuME emulator.
@@ -45,7 +46,7 @@ pub struct DeSmuME {
     memory: DeSmuMEMemory,
     movie: DeSmuMEMovie,
     savestate: DeSmuMESavestate,
-    window: Option<DeSmuMESdlWindow>
+    window: Option<DeSmuMESdlWindow>,
 }
 
 impl DeSmuME {
@@ -62,23 +63,25 @@ impl DeSmuME {
     pub fn init() -> Result<DeSmuME, DeSmuMEError> {
         unsafe {
             if ALREADY_INITIALIZED {
-                return Err(DeSmuMEError::AlreadyInit)
+                return Err(DeSmuMEError::AlreadyInit);
             }
             ALREADY_INITIALIZED = true;
             desmume_set_savetype(0);
             if !WAS_EVER_ALREADY_INITIALIZED {
                 if desmume_init() < 0 {
-                    return Err(DeSmuMEError::FailedInit)
+                    return Err(DeSmuMEError::FailedInit);
                 }
                 WAS_EVER_ALREADY_INITIALIZED = true;
             }
         }
         Ok(Self {
-            input: DeSmuMEInput {joystick_was_init: false},
+            input: DeSmuMEInput {
+                joystick_was_init: false,
+            },
             memory: DeSmuMEMemory(PhantomData),
             movie: DeSmuMEMovie(PhantomData),
             savestate: DeSmuMESavestate(PhantomData),
-            window: None
+            window: None,
         })
     }
 
@@ -153,12 +156,16 @@ impl DeSmuME {
         if keep_keypad {
             self.input.keypad_update(0);
         }
-        unsafe { desmume_resume(); }
+        unsafe {
+            desmume_resume();
+        }
     }
 
     /// Resets the emulator / restarts the current game.
     pub fn reset(&mut self) {
-        unsafe { desmume_reset(); }
+        unsafe {
+            desmume_reset();
+        }
     }
 
     /// Returns `true`, if a game is loaded and the emulator is running (not paused).
@@ -189,10 +196,13 @@ impl DeSmuME {
     /// Otherwise a new window is created and it is given the properties based on the parameters:
     /// - `auto_pause`: Whether or not "tabbing out" of the window pauses the game.
     /// - `use_opengl_if_possible`: Whether or not to use OpenGL for rendering, if available.
-    pub fn create_sdl_window(&mut self, auto_pause: bool, use_opengl_if_possible: bool) -> Result<&mut DeSmuMESdlWindow, DeSmuMEError> {
+    pub fn create_sdl_window(
+        &mut self,
+        auto_pause: bool,
+        use_opengl_if_possible: bool,
+    ) -> Result<&mut DeSmuMESdlWindow, DeSmuMEError> {
         if self.window.is_none() {
             self.window = Some(DeSmuMESdlWindow::new(auto_pause, use_opengl_if_possible)?);
-
         }
         Ok(self.window.as_mut().unwrap())
     }
@@ -200,9 +210,7 @@ impl DeSmuME {
     /// Return the display buffer in the internal format.
     /// You probably want to use display_buffer_as_rgbx instead.
     pub fn display_buffer(&self) -> &[u16] {
-        unsafe {
-            &*slice_from_raw_parts(desmume_draw_raw(), ffi::FRAMEBUFFER_SIZE)
-        }
+        unsafe { &*slice_from_raw_parts(desmume_draw_raw(), ffi::FRAMEBUFFER_SIZE) }
     }
 
     /// Fill in the display buffer as RGBX color values,

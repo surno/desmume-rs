@@ -1,6 +1,6 @@
-use std::marker::PhantomData;
-use crate::DeSmuMEError;
 use crate::ffi::*;
+use crate::DeSmuMEError;
+use std::marker::PhantomData;
 
 /// A window that displays the emulator and processes touchscreen and keyboard inputs
 /// (default keyboard configuration only).
@@ -10,13 +10,14 @@ use crate::ffi::*;
 pub struct DeSmuMESdlWindow(PhantomData<()>);
 
 impl DeSmuMESdlWindow {
-    pub(crate) fn new(auto_pause: bool, use_opengl_if_possible: bool) -> Result<DeSmuMESdlWindow, DeSmuMEError> {
+    pub(crate) fn new(
+        auto_pause: bool,
+        use_opengl_if_possible: bool,
+    ) -> Result<DeSmuMESdlWindow, DeSmuMEError> {
         unsafe {
-            if desmume_draw_window_init(
-                auto_pause as c_bool,
-                use_opengl_if_possible as c_bool
-            ) < 0 {
-                return Err(DeSmuMEError::FailedInitWindow)
+            if desmume_draw_window_init(auto_pause as c_bool, use_opengl_if_possible as c_bool) < 0
+            {
+                return Err(DeSmuMEError::FailedInitWindow);
             }
         }
         Ok(Self(PhantomData))

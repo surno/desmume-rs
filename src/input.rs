@@ -1,9 +1,9 @@
-use crate::DeSmuMEError;
 use crate::ffi::*;
+use crate::DeSmuMEError;
 
 /// Manage input processing for the emulator.
 pub struct DeSmuMEInput {
-    pub(crate) joystick_was_init: bool
+    pub(crate) joystick_was_init: bool,
 }
 
 impl DeSmuMEInput {
@@ -78,7 +78,7 @@ impl DeSmuMEInput {
     }
 
     /// Adds a key to the emulators current keymask (presses it). To be used with `keymask`:
-    /// 
+    ///
     /// ```rs
     /// let emu: DeSmuME;
     /// emu.input.keypad_add_key(keymask(Key::A)));
@@ -94,7 +94,7 @@ impl DeSmuMEInput {
         let old_keypad = self.keypad_get();
         self.keypad_update(rm_key(old_keypad, keymask));
     }
-    
+
     pub fn touch_set_pos(&mut self, x: u16, y: u16) {
         unsafe { desmume_input_set_touch_pos(x, y) }
     }
@@ -116,7 +116,7 @@ impl Drop for DeSmuMEInput {
 pub enum Joy {
     Axis = 0,
     Hat = 1,
-    Button = 2
+    Button = 2,
 }
 
 /// Jostick hat identifiers.
@@ -126,7 +126,7 @@ pub enum JoyHats {
     Right = 0,
     Left = 1,
     Up = 2,
-    Down = 3
+    Down = 3,
 }
 
 /// The total number of keys.
@@ -152,7 +152,7 @@ pub enum Key {
     Y = 12,
     Debug = 13,
     Boost = 14,
-    Lid = 15
+    Lid = 15,
 }
 
 #[inline(always)]

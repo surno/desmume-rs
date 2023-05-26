@@ -26,7 +26,7 @@ pub enum DeSmuMEError {
     #[error("Failed to initialize the joystick controls.")]
     FailedInitJoystick,
     #[error("Null error while trying to convert string.")]
-    NulError(#[source] NulError)
+    NulError(#[source] NulError),
 }
 
 impl From<NulError> for DeSmuMEError {

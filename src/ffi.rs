@@ -6,7 +6,9 @@ pub type c_bool = c_int;
 pub type MemoryCbFnc = Option<extern "C" fn(addr: c_uint, size: c_int) -> c_bool>;
 #[repr(u32)]
 pub enum StartFrom {
-    Blank = 0, SRAM = 1, Savestate = 2
+    Blank = 0,
+    SRAM = 1,
+    Savestate = 2,
 }
 
 pub const GPU_FRAMEBUFFER_NATIVE_WIDTH: usize = 256;
@@ -14,7 +16,10 @@ pub const GPU_FRAMEBUFFER_NATIVE_HEIGHT: usize = 192;
 // The framebuffer *may* be bigger (more pages etc.) but this is the only relevant parts of it.
 // Also yes this constant is defined is a bit weird, but I just took it from the DeSmuME source
 // (see _displayInfo.framebufferPageSize = ... in GPU.cpp).
-pub const FRAMEBUFFER_SIZE: usize = ((GPU_FRAMEBUFFER_NATIVE_WIDTH * GPU_FRAMEBUFFER_NATIVE_HEIGHT) + (GPU_FRAMEBUFFER_NATIVE_WIDTH * GPU_FRAMEBUFFER_NATIVE_HEIGHT)) * 2;
+pub const FRAMEBUFFER_SIZE: usize = ((GPU_FRAMEBUFFER_NATIVE_WIDTH
+    * GPU_FRAMEBUFFER_NATIVE_HEIGHT)
+    + (GPU_FRAMEBUFFER_NATIVE_WIDTH * GPU_FRAMEBUFFER_NATIVE_HEIGHT))
+    * 2;
 
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -56,10 +61,7 @@ extern "C" {
 
     pub fn desmume_has_opengl() -> c_bool;
 
-    pub fn desmume_draw_window_init(
-        auto_pause: c_bool,
-        use_opengl_if_possible: c_bool,
-    ) -> c_int;
+    pub fn desmume_draw_window_init(auto_pause: c_bool, use_opengl_if_possible: c_bool) -> c_int;
 
     pub fn desmume_draw_window_input();
 
@@ -94,15 +96,9 @@ extern "C" {
 
     pub fn desmume_gpu_get_layer_sub_enable_state(layer_index: c_int) -> c_bool;
 
-    pub fn desmume_gpu_set_layer_main_enable_state(
-        layer_index: c_int,
-        the_state: c_bool,
-    );
+    pub fn desmume_gpu_set_layer_main_enable_state(layer_index: c_int, the_state: c_bool);
 
-    pub fn desmume_gpu_set_layer_sub_enable_state(
-        layer_index: c_int,
-        the_state: c_bool,
-    );
+    pub fn desmume_gpu_set_layer_sub_enable_state(layer_index: c_int, the_state: c_bool);
 
     pub fn desmume_volume_get() -> c_int;
 
@@ -118,7 +114,7 @@ extern "C" {
 
     pub fn desmume_memory_read_long(address: c_int) -> c_ulong;
 
-    pub fn desmume_memory_read_long_signed(address: c_int, ) -> c_long;
+    pub fn desmume_memory_read_long_signed(address: c_int) -> c_long;
 
     pub fn desmume_memory_write_byte(address: c_int, value: c_uchar);
 
