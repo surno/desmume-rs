@@ -276,3 +276,15 @@ impl DeSmuMEMemory {
         unsafe { desmume_memory_register_exec(address as c_int, 2, callback) }
     }
 }
+
+impl AsRef<DeSmuMEMemory> for DeSmuMEMemory {
+    fn as_ref(&self) -> &DeSmuMEMemory {
+        self
+    }
+}
+
+impl AsMut<DeSmuMEMemory> for DeSmuMEMemory {
+    fn as_mut(&mut self) -> &mut DeSmuMEMemory {
+        self
+    }
+}
