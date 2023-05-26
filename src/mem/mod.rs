@@ -4,7 +4,7 @@ mod read;
 pub use crate::ffi::MemoryCbFnc;
 use crate::ffi::*;
 pub use crate::mem::index::{IndexMove, IndexSet};
-pub use crate::mem::read::{MemIndexWrapper, TypedMemoryReader, TypedMemoryWriter};
+pub use crate::mem::read::{MemIndexWrapper, TypedMemoryAccessor};
 use std::marker::PhantomData;
 
 pub enum Processor {
@@ -96,8 +96,8 @@ impl DeSmuMEMemory {
     ///     let b: Vec<u8> = mem.u8().index_move(123..456);
     /// }
     /// ```
-    pub fn u8(&self) -> MemIndexWrapper<TypedMemoryReader<u8>, u8, false> {
-        MemIndexWrapper(TypedMemoryReader(self, PhantomData), PhantomData)
+    pub fn u8(&self) -> MemIndexWrapper<TypedMemoryAccessor<&DeSmuMEMemory, u8>, u8> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows writing to the memory using a &mut \[u8]-like type.
@@ -118,8 +118,8 @@ impl DeSmuMEMemory {
     ///     mem.u8_mut().index_set(500..600, &b);
     /// }
     /// ```
-    pub fn u8_mut(&mut self) -> MemIndexWrapper<TypedMemoryWriter<u8>, u8, true> {
-        MemIndexWrapper(TypedMemoryWriter(self, PhantomData), PhantomData)
+    pub fn u8_mut(&mut self) -> MemIndexWrapper<TypedMemoryAccessor<&mut DeSmuMEMemory, u8>, u8> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows reading the memory using a &\[u16]-like type. Please note that reading memory always copies.
@@ -127,8 +127,8 @@ impl DeSmuMEMemory {
     /// (so the size indexed by MUST be a multiple of 2 if you use ranges).
     ///
     /// See [`DeSmuMEMemory::u8`] for info on how to use this type.
-    pub fn u16(&self) -> MemIndexWrapper<TypedMemoryReader<u16>, u16, false> {
-        MemIndexWrapper(TypedMemoryReader(self, PhantomData), PhantomData)
+    pub fn u16(&self) -> MemIndexWrapper<TypedMemoryAccessor<&DeSmuMEMemory, u16>, u16> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows writing to the memory using a &mut \[u16]-like type.
@@ -136,8 +136,10 @@ impl DeSmuMEMemory {
     /// (so the size indexed by MUST be a multiple of 2 if you use ranges).
     ///
     /// See [`DeSmuMEMemory::u8_mut`] for info on how to use this type.
-    pub fn u16_mut(&mut self) -> MemIndexWrapper<TypedMemoryWriter<u16>, u16, true> {
-        MemIndexWrapper(TypedMemoryWriter(self, PhantomData), PhantomData)
+    pub fn u16_mut(
+        &mut self,
+    ) -> MemIndexWrapper<TypedMemoryAccessor<&mut DeSmuMEMemory, u16>, u16> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows reading the memory using a &\[u32]-like type. Please note that reading memory always copies.
@@ -145,8 +147,8 @@ impl DeSmuMEMemory {
     /// (so the size indexed by MUST be a multiple of 4 if you use ranges).
     ///
     /// See [`DeSmuMEMemory::u8`] for info on how to use this type.
-    pub fn u32(&self) -> MemIndexWrapper<TypedMemoryReader<u32>, u32, false> {
-        MemIndexWrapper(TypedMemoryReader(self, PhantomData), PhantomData)
+    pub fn u32(&self) -> MemIndexWrapper<TypedMemoryAccessor<&DeSmuMEMemory, u32>, u32> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows writing to the memory using a &mut \[u32]-like type.
@@ -154,22 +156,24 @@ impl DeSmuMEMemory {
     /// (so the size indexed by MUST be a multiple of 4 if you use ranges).
     ///
     /// See [`DeSmuMEMemory::u8_mut`] for info on how to use this type.
-    pub fn u32_mut(&mut self) -> MemIndexWrapper<TypedMemoryWriter<u32>, u32, true> {
-        MemIndexWrapper(TypedMemoryWriter(self, PhantomData), PhantomData)
+    pub fn u32_mut(
+        &mut self,
+    ) -> MemIndexWrapper<TypedMemoryAccessor<&mut DeSmuMEMemory, u32>, u32> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows reading the memory using a &\[i8]-like type. Please note that reading memory always copies.
     ///
     /// See [`DeSmuMEMemory::u8`] for info on how to use this type.
-    pub fn i8(&self) -> MemIndexWrapper<TypedMemoryReader<i8>, i8, false> {
-        MemIndexWrapper(TypedMemoryReader(self, PhantomData), PhantomData)
+    pub fn i8(&self) -> MemIndexWrapper<TypedMemoryAccessor<&DeSmuMEMemory, i8>, i8> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows writing to the memory using a &mut \[i8]-like type.
     ///
     /// See [`DeSmuMEMemory::u8_mut`] for info on how to use this type.
-    pub fn i8_mut(&mut self) -> MemIndexWrapper<TypedMemoryWriter<i8>, i8, true> {
-        MemIndexWrapper(TypedMemoryWriter(self, PhantomData), PhantomData)
+    pub fn i8_mut(&mut self) -> MemIndexWrapper<TypedMemoryAccessor<&mut DeSmuMEMemory, i8>, i8> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows reading the memory using a &\[i16]-like type. Please note that reading memory always copies.
@@ -177,8 +181,8 @@ impl DeSmuMEMemory {
     /// (so the size indexed by MUST be a multiple of 2 if you use ranges).
     ///
     /// See [`DeSmuMEMemory::u8`] for info on how to use this type.
-    pub fn i16(&self) -> MemIndexWrapper<TypedMemoryReader<i16>, i16, false> {
-        MemIndexWrapper(TypedMemoryReader(self, PhantomData), PhantomData)
+    pub fn i16(&self) -> MemIndexWrapper<TypedMemoryAccessor<&DeSmuMEMemory, i16>, i16> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows writing to the memory using a &mut \[i16]-like type.
@@ -186,16 +190,18 @@ impl DeSmuMEMemory {
     /// (so the size indexed by MUST be a multiple of 2 if you use ranges).
     ///
     /// See [`DeSmuMEMemory::u8_mut`] for info on how to use this type.
-    pub fn i16_mut(&mut self) -> MemIndexWrapper<TypedMemoryWriter<i16>, i16, true> {
-        MemIndexWrapper(TypedMemoryWriter(self, PhantomData), PhantomData)
+    pub fn i16_mut(
+        &mut self,
+    ) -> MemIndexWrapper<TypedMemoryAccessor<&mut DeSmuMEMemory, i16>, i16> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows reading the memory using a &\[i32]-like type. Please note that reading memory always copies.
     /// The returned type is indexed using normal memory addresses (so the size indexed by MUST be a multiple of 4 if you use ranges).
     ///
     /// See [`DeSmuMEMemory::u8`] for info on how to use this type.
-    pub fn i32(&self) -> MemIndexWrapper<TypedMemoryReader<i32>, i32, false> {
-        MemIndexWrapper(TypedMemoryReader(self, PhantomData), PhantomData)
+    pub fn i32(&self) -> MemIndexWrapper<TypedMemoryAccessor<&DeSmuMEMemory, i32>, i32> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     /// Allows writing to the memory using a &mut \[i32]-like type.
@@ -203,8 +209,10 @@ impl DeSmuMEMemory {
     /// (so the size indexed by MUST be a multiple of 4 if you use ranges).
     ///
     /// See [`DeSmuMEMemory::u8_mut`] for info on how to use this type.
-    pub fn i32_mut(&mut self) -> MemIndexWrapper<TypedMemoryWriter<i32>, i32, true> {
-        MemIndexWrapper(TypedMemoryWriter(self, PhantomData), PhantomData)
+    pub fn i32_mut(
+        &mut self,
+    ) -> MemIndexWrapper<TypedMemoryAccessor<&mut DeSmuMEMemory, i32>, i32> {
+        MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
     }
 
     pub fn get_reg(&self, processor: Processor, reg: Register) -> u32 {
