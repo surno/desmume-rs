@@ -5,6 +5,7 @@ pub use crate::ffi::MemoryCbFnc;
 use crate::ffi::*;
 pub use crate::mem::index::{IndexMove, IndexSet};
 pub use crate::mem::read::{MemIndexWrapper, TypedMemoryAccessor};
+use std::ffi::CString;
 use std::marker::PhantomData;
 
 pub enum Processor {
@@ -213,6 +214,20 @@ impl DeSmuMEMemory {
         &mut self,
     ) -> MemIndexWrapper<TypedMemoryAccessor<&mut DeSmuMEMemory, i32>, i32> {
         MemIndexWrapper(TypedMemoryAccessor(self, PhantomData), PhantomData)
+    }
+
+    /// Reads a CString (\0 terminated) starting at the given memory location.
+    pub fn read_cstring(&self, start: u32) -> CString {
+        let mut buffer: Vec<u8> = Vec::with_capacity(64);
+        let mut addr = start as i32;
+        let mut cur_byte = unsafe { desmume_memory_read_byte(addr) };
+        while cur_byte != 0 {
+            buffer.push(cur_byte);
+            addr += 1;
+            cur_byte = unsafe { desmume_memory_read_byte(addr) };
+        }
+        // SAFETY: cur_byte was never added to buffer when it was 0.
+        unsafe { CString::from_vec_unchecked(buffer) }
     }
 
     pub fn get_reg(&self, processor: Processor, reg: Register) -> u32 {
