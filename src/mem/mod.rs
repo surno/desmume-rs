@@ -50,28 +50,55 @@ pub enum Register {
 impl Register {
     fn get_name(&self) -> &str {
         match self {
-            Register::R0 => "r0",
-            Register::R1 => "r1",
-            Register::R2 => "r2",
-            Register::R3 => "r3",
-            Register::R4 => "r4",
-            Register::R5 => "r5",
-            Register::R6 => "r6",
-            Register::R7 => "r7",
-            Register::R8 => "r8",
-            Register::R9 => "r9",
-            Register::R10 => "r10",
-            Register::R11 => "r11",
-            Register::R12 => "r12",
-            Register::R13 => "r13",
-            Register::R14 => "r14",
-            Register::R15 => "r15",
-            Register::CPSR => "cpsr",
-            Register::SPSR => "spsr",
+            Self::R0 => "r0",
+            Self::R1 => "r1",
+            Self::R2 => "r2",
+            Self::R3 => "r3",
+            Self::R4 => "r4",
+            Self::R5 => "r5",
+            Self::R6 => "r6",
+            Self::R7 => "r7",
+            Self::R8 => "r8",
+            Self::R9 => "r9",
+            Self::R10 => "r10",
+            Self::R11 => "r11",
+            Self::R12 => "r12",
+            Self::R13 => "r13",
+            Self::R14 => "r14",
+            Self::R15 => "r15",
+            Self::CPSR => "cpsr",
+            Self::SPSR => "spsr",
 
-            Register::SP => "r13",
-            Register::LR => "r14",
-            Register::PC => "r15",
+            Self::SP => "r13",
+            Self::LR => "r14",
+            Self::PC => "r15",
+        }
+    }
+}
+
+/// Try from register number. If number is not a valid register, errors.
+impl TryFrom<u32> for Register {
+    type Error = ();
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(Self::R0),
+            1 => Ok(Self::R1),
+            2 => Ok(Self::R2),
+            3 => Ok(Self::R3),
+            4 => Ok(Self::R4),
+            5 => Ok(Self::R5),
+            6 => Ok(Self::R6),
+            7 => Ok(Self::R7),
+            8 => Ok(Self::R8),
+            9 => Ok(Self::R9),
+            10 => Ok(Self::R10),
+            11 => Ok(Self::R11),
+            12 => Ok(Self::R12),
+            13 => Ok(Self::R13),
+            14 => Ok(Self::R14),
+            15 => Ok(Self::R15),
+            _ => Err(()),
         }
     }
 }

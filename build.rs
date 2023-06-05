@@ -44,7 +44,7 @@ fn main() {
         } else {
             "Release"
         };
-        let (arch_dirname, arch_targetname) = if cfg!(target_pointer_width = "64") {
+        let (_, arch_targetname) = if cfg!(target_pointer_width = "64") {
             ("x64", "x64")
         } else {
             ("x86", "Win32")
@@ -56,21 +56,6 @@ fn main() {
         run(&mut cmd, "meson");
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-        let dll_path = glob::glob(
-            build_dir
-                .join("src/frontend/interface/windows/__bins/*.dll")
-                .to_str()
-                .unwrap(),
-        )
-        .unwrap()
-        .next()
-        .unwrap()
-        .unwrap();
-        let mut cmd = Command::new("cp");
-        cmd.current_dir(build_dir)
-            .arg(dll_path)
-            .arg(&dst.join("desmume.dll"));
-        let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
         let lib_path = glob::glob(
             build_dir
                 .join("src/frontend/interface/windows/__bins/*.lib")
@@ -81,27 +66,21 @@ fn main() {
         .next()
         .unwrap()
         .unwrap();
-        let mut cmd = Command::new("cp");
+        let mut cmd = Command::new("copy");
         cmd.current_dir(build_dir)
             .arg(lib_path)
             .arg(&dst.join("desmume.lib"));
-        run(&mut cmd, "cp");
-        let mut cmd = Command::new("cp");
-        cmd.current_dir(build_dir)
-            .arg(&build_dir.join(format!(
-                "src/frontend/interface/windows/SDL/lib/{}/SDL2.dll",
-                arch_dirname
-            )))
-            .arg(&dst);
-        run(&mut cmd, "cp");
+        run(&mut cmd, "copy");
         println!(
             "cargo:rustc-link-search={}",
             dst.as_os_str().to_str().unwrap()
-        )
+        );
+        println!("cargo:lib=static={}", dst.display());
     } else {
         // Meson based Linux/Mac build
         let mut cmd = Command::new("meson");
         cmd.arg("build")
+            .arg("--default-library=static")
             .arg("-Dbuildtype=release")
             .current_dir(&build_dir.join("src/frontend/interface"));
         run(&mut cmd, "meson");
@@ -110,25 +89,27 @@ fn main() {
         cmd.arg("-C")
             .arg("build")
             .current_dir(&build_dir.join("src/frontend/interface"));
-        run(&mut cmd, "meson");
-
-        if target.contains("apple-darwin") {
-            let mut cmd = Command::new("mv");
-            cmd.current_dir(build_dir)
-                .arg(&build_dir.join("src/frontend/interface/build/libdesmume.dylib"))
-                .arg(&build_dir.join("src/frontend/interface/build/libdesmume.so"));
-            run(&mut cmd, "mv");
-        }
+        run(&mut cmd, "ninja");
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
         let mut cmd = Command::new("cp");
         cmd.current_dir(build_dir)
-            .arg(&build_dir.join("src/frontend/interface/build/libdesmume.so"))
+            .arg("-r")
+            .arg(&build_dir.join("src/frontend/interface/build/libdesmume.a"))
+            .arg(&build_dir.join("src/frontend/interface/build/libdesmume.a.p"))
             .arg(&dst);
         run(&mut cmd, "cp");
 
-        println!("cargo:rustc-link-search=native={}", dst.display());
-        println!("cargo:lib={}", dst.display());
+        println!("cargo:rustc-link-lib=glib-2.0");
+        println!("cargo:rustc-link-lib=SDL2");
+        println!("cargo:rustc-link-lib=pcap");
+        println!("cargo:rustc-link-lib=z");
+        println!("cargo:rustc-link-lib=SoundTouch");
+        println!("cargo:rustc-link-lib=openal");
+        println!("cargo:rustc-link-lib=GL");
+        println!("cargo:rustc-link-lib=stdc++");
+        println!("cargo:rustc-link-search={}", dst.display());
+        println!("cargo:lib=static={}", dst.display());
     }
 }
 

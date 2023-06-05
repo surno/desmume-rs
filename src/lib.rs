@@ -22,8 +22,8 @@ pub use crate::sdl_window::DeSmuMESdlWindow;
 
 static mut WAS_EVER_ALREADY_INITIALIZED: bool = false;
 static mut ALREADY_INITIALIZED: bool = false;
-pub const SCREEN_WIDTH: usize = ffi::GPU_FRAMEBUFFER_NATIVE_WIDTH;
-pub const SCREEN_HEIGHT: usize = ffi::GPU_FRAMEBUFFER_NATIVE_HEIGHT;
+pub const SCREEN_WIDTH: usize = GPU_FRAMEBUFFER_NATIVE_WIDTH;
+pub const SCREEN_HEIGHT: usize = GPU_FRAMEBUFFER_NATIVE_HEIGHT;
 pub const SCREEN_HEIGHT_BOTH: usize = SCREEN_HEIGHT * 2;
 pub const SCREEN_PIXEL_SIZE: usize = SCREEN_WIDTH * SCREEN_HEIGHT;
 pub const SCREEN_PIXEL_SIZE_BOTH: usize = SCREEN_WIDTH * SCREEN_HEIGHT_BOTH;
