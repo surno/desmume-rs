@@ -100,13 +100,15 @@ fn main() {
             .arg(&dst);
         run(&mut cmd, "cp");
 
-        println!("cargo:rustc-link-lib=glib-2.0");
-        println!("cargo:rustc-link-lib=SDL2");
-        println!("cargo:rustc-link-lib=pcap");
-        println!("cargo:rustc-link-lib=z");
-        println!("cargo:rustc-link-lib=SoundTouch");
-        println!("cargo:rustc-link-lib=openal");
-        println!("cargo:rustc-link-lib=GL");
+        let cfg = pkg_config::Config::new();
+        cfg.probe("glib-2.0").unwrap();
+        cfg.probe("sdl").unwrap();
+        cfg.probe("libpcap").unwrap();
+        cfg.probe("zlib").unwrap();
+        cfg.probe("soundtouch").ok();
+        cfg.probe("openal").ok();
+        cfg.probe("opengl").unwrap();
+
         println!("cargo:rustc-link-lib=stdc++");
         println!("cargo:rustc-link-search={}", dst.display());
         println!("cargo:lib=static={}", dst.display());
