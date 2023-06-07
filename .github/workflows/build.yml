@@ -26,7 +26,7 @@ jobs:
       - name: Install MacOS build deps
         if: matrix.os == 'macos-11'
         run: |
-          brew install coreutils gcc sdl2 meson glib openal-soft
+          brew install coreutils gcc sdl2 meson glib
       - name: "MacOS: Set env"
         if: matrix.os == 'macos-11'
         run: |
