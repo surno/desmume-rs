@@ -108,6 +108,7 @@ fn main() {
         cfg.probe("soundtouch").ok();
         cfg.probe("openal").ok();
         cfg.probe("opengl").unwrap();
+        cfg.probe("alsa").ok();
 
         println!("cargo:rustc-link-lib=stdc++");
         println!("cargo:rustc-link-search={}", dst.display());
