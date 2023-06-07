@@ -64,7 +64,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install MacOS build deps
-        if: matrix.os == 'macos-10.15'
+        if: matrix.os == 'macos-11'
         run: |
           brew install coreutils gcc sdl2 meson glib
       - name: Add msbuild to PATH
