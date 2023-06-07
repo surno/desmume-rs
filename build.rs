@@ -102,7 +102,7 @@ fn main() {
 
         let cfg = pkg_config::Config::new();
         cfg.probe("glib-2.0").unwrap();
-        cfg.probe("sdl").unwrap();
+        cfg.probe("sdl2").unwrap();
         cfg.probe("libpcap").unwrap();
         cfg.probe("zlib").unwrap();
         cfg.probe("soundtouch").ok();
