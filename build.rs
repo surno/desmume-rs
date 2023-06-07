@@ -55,7 +55,10 @@ fn main() {
         // which is set by default because the default is building a dynamic libary:
         let props_path = build_dir.join("src/frontend/interface/windows/desmume.props");
         let props = fs::read_to_string(&props_path).unwrap();
-        fs::write(props_path, props.replace(";WIN_EXPORT", "")).unwrap();
+        let mprops = props
+            .replace(";WIN_EXPORT", "")
+            .replace(".dll</TargetPath>", ".lib</TargetPath>");
+        fs::write(props_path, mprops).unwrap();
 
         cmd.arg("DeSmuME_Interface.vcxproj")
             .arg(format!("/p:configuration={}", config))
