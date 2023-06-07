@@ -4,13 +4,34 @@ on: [push, pull_request]
 
 jobs:
   tests:
-    name: Tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    name: Test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2019
+            target: i686-pc-windows-msvc
+          - os: windows-2019
+            target: x86_64-pc-windows-msvc
+          - os: macos-11
+            target: x86_64-apple-darwin
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: recursive
+          
+      - name: Install MacOS build deps
+        if: matrix.os == 'macos-11'
+        run: |
+          brew install coreutils gcc sdl2 meson glib
+      - name: Add msbuild to PATH
+        if: matrix.os == 'windows-2019'
+        uses: microsoft/setup-msbuild@v1
       - name: Install meson, SDL, etc.
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           sudo apt-get update
           sudo apt-get install python3 python3-pip python3-setuptools python3-wheel ninja-build libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev
@@ -18,32 +39,16 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          target: ${{ matrix.target }}
           override: true
+          default: true
+
       - name: Run cargo test
         run: cargo test
 
-  build_linux:
-    runs-on: ubuntu-latest
-    name: Build Linux
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          submodules: recursive
-      - name: Install meson, SDL, etc.
-        run: |
-          sudo apt-get update
-          sudo apt-get install python3 python3-pip python3-setuptools python3-wheel ninja-build libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev
-          sudo pip3 install meson
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - name: Build
-        run: cargo build --release
-  build_macos_windows:
+  build:
     runs-on: ${{ matrix.os }}
-    name: Build Mac/Windows
+    name: Build
     strategy:
       fail-fast: false
       matrix:
@@ -59,6 +64,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+
       - name: Install MacOS build deps
         if: matrix.os == 'macos-11'
         run: |
@@ -66,12 +72,20 @@ jobs:
       - name: Add msbuild to PATH
         if: matrix.os == 'windows-2019'
         uses: microsoft/setup-msbuild@v1
+      - name: Install meson, SDL, etc.
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3 python3-pip python3-setuptools python3-wheel ninja-build libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev
+          sudo pip3 install meson
+
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
           default: true
+
       - name: Build
         run: cargo build --release
         env:
