@@ -53,7 +53,7 @@ fn main() {
         cmd.arg("DeSmuME_Interface.vcxproj")
             .arg(format!("/p:configuration={}", config))
             .arg(format!("/p:Platform={}", arch_targetname))
-            .arg("-property:ConfigurationType=StaticLibrary")
+            .arg("-property:name=StaticLibrary")
             .current_dir(&build_dir.join("src/frontend/interface/windows"));
         run(&mut cmd, "meson");
 
@@ -114,7 +114,10 @@ fn main() {
         let cfg = pkg_config::Config::new();
         cfg.probe("glib-2.0").unwrap();
         cfg.probe("sdl2").unwrap();
-        cfg.probe("libpcap").unwrap();
+        if cfg.probe("libpcap").is_err() {
+            // Probing may fail under MacOS. Still try to link.
+            println!("cargo:rustc-link-lib=pcap");
+        }
         cfg.probe("zlib").unwrap();
         cfg.probe("soundtouch").ok();
         cfg.probe("openal").ok();
