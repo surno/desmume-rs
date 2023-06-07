@@ -137,7 +137,11 @@ fn main() {
         }
         cfg.probe("alsa").ok();
 
-        println!("cargo:rustc-link-lib=stdc++");
+        if target.contains("darwin") {
+            println!("cargo:rustc-link-lib=c++");
+        } else {
+            println!("cargo:rustc-link-lib=stdc++");
+        }
         println!("cargo:rustc-link-search={}", dst.display());
         println!("cargo:lib=static={}", dst.display());
     }
