@@ -20,9 +20,7 @@ jobs:
           toolchain: stable
           override: true
       - name: Run cargo test
-        uses: actions-rs/cargo@v1
-        with:
-          command: test
+        run: cargo test
 
   build_linux:
     runs-on: ubuntu-latest
@@ -41,10 +39,8 @@ jobs:
         with:
           toolchain: stable
           override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
+      - name: Build
+        run: cargo build --release
   build_macos_windows:
     runs-on: ${{ matrix.os }}
     name: Build Mac/Windows
@@ -69,17 +65,15 @@ jobs:
           brew install coreutils gcc sdl2 meson glib
       - name: Add msbuild to PATH
         if: matrix.os == 'windows-2019'
-        uses: microsoft/setup-msbuild@v1.0.2
+        uses: microsoft/setup-msbuild@v1
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
           default: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release
+      - name: Build
+        run: cargo build --release
         env:
           TARGET: ${{ matrix.target }}
           FASTBUILD: "1"
