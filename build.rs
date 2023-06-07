@@ -128,7 +128,10 @@ fn main() {
         cfg.probe("zlib").unwrap();
         cfg.probe("soundtouch").ok();
         cfg.probe("openal").ok();
-        cfg.probe("opengl").unwrap();
+        if cfg.probe("opengl").is_err() {
+            // Probing may fail under MacOS. Still try to link.
+            println!("cargo:rustc-link-lib=GL");
+        }
         cfg.probe("alsa").ok();
 
         println!("cargo:rustc-link-lib=stdc++");
