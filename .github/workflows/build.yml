@@ -52,6 +52,8 @@ jobs:
         run: cargo test
         env:
           SDL_VIDEODRIVER: dummy
+          TARGET: ${{ matrix.target }}
+          FASTBUILD: "1"
 
   build:
     runs-on: ${{ matrix.os }}
