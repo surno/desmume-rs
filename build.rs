@@ -133,7 +133,7 @@ fn main() {
         cfg.probe("openal").ok();
         if cfg.probe("opengl").is_err() {
             // Probing may fail under MacOS. Still try to link.
-            println!("cargo:rustc-link-lib=OpenGL");
+            println!("cargo:rustc-link-lib=framework=OpenGL");
         }
         cfg.probe("alsa").ok();
 
