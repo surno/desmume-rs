@@ -1,5 +1,5 @@
 use std::env;
-use std::fs::copy;
+use std::fs;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::process::Command;
@@ -50,6 +50,13 @@ fn main() {
         } else {
             ("x86", "Win32")
         };
+
+        // before we continue, we need to make sure that we do not set WIN_EXPORT
+        // which is set by default because the default is building a dynamic libary:
+        let props_path = build_dir.join("src/frontend/interface/windows/desmume.props");
+        let props = fs::read_to_string(&props_path).unwrap();
+        fs::write(props_path, props.replace(";WIN_EXPORT", "")).unwrap();
+
         cmd.arg("DeSmuME_Interface.vcxproj")
             .arg(format!("/p:configuration={}", config))
             .arg(format!("/p:Platform={}", arch_targetname))
@@ -80,8 +87,8 @@ fn main() {
         .next()
         .unwrap()
         .unwrap();
-        copy(lib_path, dst.join("desmume.lib")).unwrap();
-        copy(sdl_lib_path, dst.join("SDL2.lib")).unwrap();
+        fs::copy(lib_path, dst.join("desmume.lib")).unwrap();
+        fs::copy(sdl_lib_path, dst.join("SDL2.lib")).unwrap();
         println!(
             "cargo:rustc-link-search={}",
             dst.as_os_str().to_str().unwrap()
