@@ -113,7 +113,9 @@ fn main() {
         let cfg = pkg_config::Config::new();
         cfg.probe("glib-2.0").unwrap();
         cfg.probe("sdl2").unwrap();
-        cfg.probe("libpcap").unwrap();
+        if cfg.probe("libpcap").is_err() {
+            cfg.probe("pcap").unwrap();
+        }
         cfg.probe("zlib").unwrap();
         cfg.probe("soundtouch").ok();
         cfg.probe("openal").ok();
