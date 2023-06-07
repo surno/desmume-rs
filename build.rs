@@ -1,4 +1,5 @@
 use std::env;
+use std::fs::copy;
 use std::io::ErrorKind;
 use std::path::PathBuf;
 use std::process::Command;
@@ -44,7 +45,7 @@ fn main() {
         } else {
             "Release"
         };
-        let (_, arch_targetname) = if cfg!(target_pointer_width = "64") {
+        let (arch_dirname, arch_targetname) = if cfg!(target_pointer_width = "64") {
             ("x64", "x64")
         } else {
             ("x86", "Win32")
@@ -66,11 +67,20 @@ fn main() {
         .next()
         .unwrap()
         .unwrap();
-        let mut cmd = Command::new("copy");
-        cmd.current_dir(build_dir)
-            .arg(lib_path)
-            .arg(&dst.join("desmume.lib"));
-        run(&mut cmd, "copy");
+        let sdl_lib_path = glob::glob(
+            build_dir
+                .join(format!(
+                    "src/frontend/interface/windows/SDL/lib/{arch_dirname}/SDL2.lib"
+                ))
+                .to_str()
+                .unwrap(),
+        )
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap();
+        copy(lib_path, dst.join("desmume.lib")).unwrap();
+        copy(sdl_lib_path, dst.join("SDL2.lib")).unwrap();
         println!(
             "cargo:rustc-link-search={}",
             dst.as_os_str().to_str().unwrap()
