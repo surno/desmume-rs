@@ -7,6 +7,12 @@ repository = "https://github.com/SkyTemple/desmume-rs"
 license = "GPL-3.0-or-later"
 description = "FFI for DeSmuME, the Nintendo DS emulator."
 links = "desmume"
+# Please make sure to keep this list up-to-date with the build.yml GitHub Action.
+exclude = [
+    "desmume/desmume/src/frontend/cocoa",
+    "desmume/desmume/src/frontend/windows/File_Extractor",
+    "desmume/desmume/src/frontend/windows/directx",
+]
 
 [lib]
 crate-type = ["rlib"]

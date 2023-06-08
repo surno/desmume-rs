@@ -146,6 +146,13 @@ jobs:
       - name: Set target
         run: rustup default stable-${{ matrix.target }}
 
+      # Remove all files that the exclude statement in Cargo.toml of desmume-sys removes.
+      - name: Remove excluded
+        run: |
+          rm -rf desmume_sys/desmume/desmume/src/frontend/cocoa
+          rm -rfdesmume/desmume/src/frontend/windows/File_Extractor
+          rm -rf desmume/desmume/src/frontend/windows/directx
+
       - name: Build
         run: cargo build -vv --release
         env:
