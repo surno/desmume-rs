@@ -41,7 +41,7 @@ trait MemoryWriteAccess<T: MemType> {
 }
 
 /// A reader/writer over the NDS memory (that can also read). It can be indexed since it implements
-/// [`IndexMove`] and [`IndexSet`] (via [`MemAccessWrapper`] for compiler-compatibility reasons). It is indexed by
+/// [`IndexMove`] and [`IndexSet`] (via [`MemIndexWrapper`] for compiler-compatibility reasons). It is indexed by
 /// using `u32`'s or ranges over `u32`s that address a specific space in the NDS memory. The value
 /// returned is the data at those memory locations in the format specified by `T` (eg. `u8`, `i16`, `u32`, etc.).
 pub struct TypedMemoryAccessor<M, T: MemType>(pub(crate) M, pub(crate) PhantomData<T>);
@@ -90,7 +90,7 @@ impl_read_write_access!(
 );
 
 /// A tiny wrapper to work around Rust's orphan rules limitations for the Index/IndexMut implementations of the readers and writers.
-/// Not pretty, but you can pretty much just full-transparently ignore this type. See [`TypedMemoryAccessor`] and [`TypedMemoryWriter`] instead.
+/// Not pretty, but you can pretty much just full-transparently ignore this type. See [`TypedMemoryAccessor`] instead.
 pub struct MemIndexWrapper<T, U>(pub(crate) T, pub(crate) PhantomData<U>);
 impl<T, U> Deref for MemIndexWrapper<T, U> {
     type Target = T;

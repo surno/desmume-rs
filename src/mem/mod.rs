@@ -112,7 +112,7 @@ impl DeSmuMEMemory {
     /// Use the [`IndexMove`] trait to access the returned data type.
     ///
     /// At the time of writing there is no syntactic sugar that allows indexing to return non-references,
-    /// so we have implemented [`IndexMove`] from https://github.com/rust-lang/rfcs/issues/997.
+    /// so we have implemented [`IndexMove`] from <https://github.com/rust-lang/rfcs/issues/997>.
     ///
     /// # Usage example
     /// ```rs
@@ -132,7 +132,8 @@ impl DeSmuMEMemory {
     ///
     /// Use the [`IndexSet`] and [`IndexMove`] traits to access the returned data type.
     /// At the time of writing there is no syntactic sugar that allows indexing to return non-references,
-    /// so we have implemented [`IndexSet`] and [`IndexMove`] from https://github.com/rust-lang/rfcs/issues/997.
+    /// so we have implemented [`IndexSet`] and [`IndexMove`] from
+    /// <https://github.com/rust-lang/rfcs/issues/997>.
     ///
     /// # Usage example
     /// ```rs

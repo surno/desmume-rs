@@ -10,6 +10,9 @@ This crate builds a fork of DeSmuME with some minor adjustments and no concrete 
 number by default. At the moment there is no option to skip this and link to a dynamic system
 library instead. Pull Requests are welcome.
 
+At the time of writing, you may also need to pass the `/SAFESEH:NO` linker argument for 32-bit Windows builds in
+your crates build script. See the `build.rs` of `desmume-rs`.
+
 The version of this crate does currently not correspond to any specific or stable release of DeSmuME.
 
 This is not an "official" crate provided by the DeSmuME maintainers, but instead maintained by the

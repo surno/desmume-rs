@@ -1,5 +1,5 @@
 //! Implementations of IndexMove and IndexSet somewhat in the spirit of
-//! https://github.com/rust-lang/rfcs/issues/997
+//! <https://github.com/rust-lang/rfcs/issues/997>
 //!
 //! In the hope one day this gets added to the language with some syntactic sugar.
 
