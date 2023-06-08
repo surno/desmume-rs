@@ -42,11 +42,7 @@ fn main() {
     if target.contains("windows") {
         // MSVC-based Windows build
         let mut cmd = Command::new("MSBuild.exe");
-        let config = if env("FASTBUILD").is_some() {
-            "Release Fastbuild"
-        } else {
-            "Release"
-        };
+        let config = "Release Fastbuild";
         let (arch_dirname, arch_targetname) = if cfg!(target_pointer_width = "64") {
             ("x64", "x64")
         } else {

@@ -65,7 +65,6 @@ jobs:
         env:
           SDL_VIDEODRIVER: dummy
           TARGET: ${{ matrix.target }}
-          FASTBUILD: "1"
 
   build:
     runs-on: ${{ matrix.os }}
@@ -121,4 +120,3 @@ jobs:
         run: cargo build -vv --release
         env:
           TARGET: ${{ matrix.target }}
-          FASTBUILD: "1"
