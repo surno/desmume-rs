@@ -61,7 +61,7 @@ fn main() {
         cmd.arg("DeSmuME_Interface.vcxproj")
             .arg(format!("/p:configuration={}", config))
             .arg(format!("/p:Platform={}", arch_targetname))
-            .arg("-property:name=StaticLibrary")
+            .arg("-property:ConfigurationType=StaticLibrary")
             .current_dir(&build_dir.join("src/frontend/interface/windows"));
         run(&mut cmd, "meson");
 
