@@ -1,5 +1,5 @@
-use rs_desmume::mem::{IndexMove, IndexSet, Processor, Register};
-use rs_desmume::DeSmuME;
+use desmume_rs::mem::{IndexMove, IndexSet, Processor, Register};
+use desmume_rs::DeSmuME;
 use std::env::current_dir;
 use std::sync::atomic::{AtomicBool, Ordering};
 
