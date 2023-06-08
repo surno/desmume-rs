@@ -131,6 +131,11 @@ fn main() {
 
         println!("cargo:rustc-link-lib=static=desmume");
 
+        // Needed for 32bit version of zlib
+        if arch_targetname != "x64" {
+            println!("cargo:rustc-link-arg=/SAFESEH:NO");
+        }
+
         println!("cargo:lib=static={}", dst.display());
     } else {
         // Meson based Linux/Mac build
