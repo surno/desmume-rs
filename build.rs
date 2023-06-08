@@ -63,7 +63,7 @@ fn main() {
             .arg(format!("/p:Platform={}", arch_targetname))
             .arg("-property:ConfigurationType=StaticLibrary")
             .current_dir(&build_dir.join("src/frontend/interface/windows"));
-        run(&mut cmd, "meson");
+        run(&mut cmd, "MSBuild");
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
         let lib_path = glob::glob(
@@ -94,6 +94,8 @@ fn main() {
             "cargo:rustc-link-search={}",
             dst.as_os_str().to_str().unwrap()
         );
+        println!("cargo:rustc-link-lib=static=desmume");
+        println!("cargo:rustc-link-lib=static=SDL2");
         println!("cargo:lib=static={}", dst.display());
     } else {
         // Meson based Linux/Mac build

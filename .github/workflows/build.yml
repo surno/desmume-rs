@@ -103,7 +103,7 @@ jobs:
           default: true
 
       - name: Build
-        run: cargo build --release
+        run: cargo build -vv --release
         env:
           TARGET: ${{ matrix.target }}
           FASTBUILD: "1"
