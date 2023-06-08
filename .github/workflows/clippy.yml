@@ -2,6 +2,9 @@ on: [push]
 
 name: Clippy
 
+env:
+  _CI_ONLY__DISABLE_DESMUME_SYS_BUILD_SCRIPT: "1"
+
 jobs:
   clippy:
     name: Clippy
@@ -18,4 +21,4 @@ jobs:
       - uses: actions-rs/clippy-check@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          args: --release --features desmume-system
+          args: --release

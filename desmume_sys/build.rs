@@ -20,6 +20,10 @@ fn env(name: &str) -> Option<String> {
 }
 
 fn main() {
+    if env("_CI_ONLY__DISABLE_DESMUME_SYS_BUILD_SCRIPT").is_some() {
+        return;
+    }
+
     let target = env::var("TARGET").unwrap();
 
     let src_sys = env::current_dir().unwrap();
