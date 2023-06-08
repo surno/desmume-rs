@@ -88,7 +88,7 @@ jobs:
       # With Windows we need to make sure SDL2.dll is in the PATH
       - name: Add SDL2.dll to PATH
         if: matrix.os == 'windows-2019'
-        run: echo "$PWD\desmume\desmume\src\frontend\interface\windows\SDL\lib\${{ matrix.arch }}" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        run: echo "$PWD\desmume_sys\desmume\desmume\src\frontend\interface\windows\SDL\lib\${{ matrix.arch }}" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Run cargo test
         run: cargo test
