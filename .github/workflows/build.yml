@@ -148,10 +148,17 @@ jobs:
 
       # Remove all files that the exclude statement in Cargo.toml of desmume-sys removes.
       - name: Remove excluded
+        if: matrix.os != 'windows-2019'
         run: |
           rm -rf desmume_sys/desmume/desmume/src/frontend/cocoa
-          rm -rfdesmume/desmume/src/frontend/windows/File_Extractor
-          rm -rf desmume/desmume/src/frontend/windows/directx
+          rm -rf desmume_sys/desmume/desmume/src/frontend/windows/File_Extractor
+          rm -rf desmume_sys/desmume/desmume/src/frontend/windows/directx
+      - name: Remove excluded
+        if: matrix.os == 'windows-2019'
+        run: |
+          rm -r -force desmume_sys/desmume/desmume/src/frontend/cocoa
+          rm -r -force desmume_sys/desmume/desmume/src/frontend/windows/File_Extractor
+          rm -r -force desmume_sys/desmume/desmume/src/frontend/windows/directx
 
       - name: Build
         run: cargo build -vv --release
