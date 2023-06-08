@@ -159,15 +159,21 @@ fn main() {
         cfg.probe("glib-2.0").unwrap();
         cfg.probe("sdl2").unwrap();
         if cfg.probe("libpcap").is_err() {
-            // Probing may fail under MacOS. Still try to link.
-            println!("cargo:rustc-link-lib=pcap");
+            if target.contains("darwin") {
+                // Probing may fail under MacOS. Still try to link.
+                println!("cargo:rustc-link-lib=pcap");
+            } else {
+                panic!("Could not find libpcap. Is it installed?");
+            }
         }
         cfg.probe("zlib").unwrap();
         cfg.probe("soundtouch").ok();
         cfg.probe("openal").ok();
         if cfg.probe("opengl").is_err() {
-            // Probing may fail under MacOS. Still try to link.
-            println!("cargo:rustc-link-lib=framework=OpenGL");
+            if target.contains("darwin") {
+                // Probing may fail under MacOS. Still try to link.
+                println!("cargo:rustc-link-lib=framework=OpenGL");
+            }
         }
         cfg.probe("alsa").ok();
 
