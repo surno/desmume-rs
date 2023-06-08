@@ -49,7 +49,6 @@ jobs:
         with:
           toolchain: stable
           target: ${{ matrix.target }}
-          override: true
           default: true
 
       # I don't know why but actions-rs seems to like not ACTUALLY setting the target
@@ -112,7 +111,6 @@ jobs:
         with:
           toolchain: stable
           target: ${{ matrix.target }}
-          override: true
           default: true
 
       # I don't know why but actions-rs seems to like not ACTUALLY setting the target
