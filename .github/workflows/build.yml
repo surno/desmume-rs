@@ -115,3 +115,8 @@ jobs:
         env:
           TARGET: ${{ matrix.target }}
           FASTBUILD: "1"
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: rs-desmume_${{ matrix.target }}_target
+          path: target/
