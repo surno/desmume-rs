@@ -12,12 +12,16 @@ jobs:
         include:
           - os: windows-2019
             target: i686-pc-windows-msvc
+            arch: x86
           - os: windows-2019
             target: x86_64-pc-windows-msvc
+            arch: x64
           - os: macos-11
             target: x86_64-apple-darwin
+            arch: x64
           - os: ubuntu-22.04
             target: x86_64-unknown-linux-gnu
+            arch: x64
     steps:
       - uses: actions/checkout@v3
         with:
@@ -51,6 +55,11 @@ jobs:
       # I don't know why but actions-rs seems to like not ACTUALLY setting the target
       - name: Set target
         run: rustup default stable-${{ matrix.target }}
+
+      # With Windows we need to make sure SDL2.dll is in the PATH
+      - name: Add SDL2.dll to PATH
+        if: matrix.os == 'windows-2019'
+        run: echo "$PWD\desmume\desmume\src\frontend\interface\windows\SDL\lib\${{ matrix.arch }}" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Run cargo test
         run: cargo test

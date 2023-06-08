@@ -111,8 +111,9 @@ fn main() {
         println!("cargo:rustc-link-lib=dylib=shlwapi");
         println!("cargo:rustc-link-lib=dylib=comctl32");
         println!("cargo:rustc-link-lib=dylib=winmm");
+        // NOTE: The static lib also just contains stubs that call into the DLL. The DLL is needed
+        // to run!
         println!("cargo:rustc-link-lib=static=SDL2");
-        println!("cargo:rustc-link-lib=static=SDL2main");
         if arch_targetname == "x64" {
             println!("cargo:rustc-link-lib=static=agg-2.5-x64");
             println!("cargo:rustc-link-lib=static=zlib-vc8-x64");
