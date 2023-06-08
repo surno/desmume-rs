@@ -26,8 +26,7 @@ fn main() {
 
     let target = env::var("TARGET").unwrap();
 
-    let src_sys = env::current_dir().unwrap();
-    let src = src_sys.join("..");
+    let src = env::current_dir().unwrap();
     let build_dir = TempDir::new().unwrap();
     let build_dir = build_dir.path();
 
