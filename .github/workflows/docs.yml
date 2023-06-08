@@ -6,7 +6,7 @@ env:
   _CI_ONLY__DISABLE_DESMUME_SYS_BUILD_SCRIPT: "1"
 
 jobs:
-  clippy:
+  docs:
     name: Docs
     runs-on: ubuntu-latest
     steps:

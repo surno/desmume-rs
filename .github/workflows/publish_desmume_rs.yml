@@ -1,0 +1,27 @@
+name: Publish desmume-rs
+
+on: [workflow_dispatch]
+
+jobs:
+  publish_rs:
+    runs-on: ubuntu-latest
+    name: Package and Publish
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Install meson, SDL, etc.
+        run: |
+          sudo apt-get update
+          sudo apt-get install python3 python3-pip python3-setuptools python3-wheel ninja-build libsdl2-dev libsdl2-2.0-0 libpcap0.8-dev
+          sudo pip3 install meson
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Package
+        run: cargo package -p desmume-rs
+
+      - name: Publish
+        run: cargo publish -p desmume-rs --dry-run

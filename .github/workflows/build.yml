@@ -1,8 +1,38 @@
-name: Build, test and publish
+name: Build and test
 
 on: [push, pull_request]
 
 jobs:
+  package-main:
+    runs-on: ubuntu-latest
+    name: Test package desmume-rs
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      # we don't verify, since the build is covered by other tests.
+      - name: Test packaging desmume-rs
+        run: cargo package --no-verify -p desmume-rs
+  package-sys:
+    runs-on: ubuntu-latest
+    name: Test package desmume-sys
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      # we don't verify, since the build is covered by other tests.
+      - name: Test packaging desmume-sys
+        run: cargo package --no-verify -p desmume-sys
   tests:
     runs-on: ${{ matrix.os }}
     name: Test
