@@ -1,0 +1,21 @@
+on: [push]
+
+name: Docs
+
+jobs:
+  clippy:
+    name: Docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rust-src
+          override: true
+      - name: Build docs
+        run: cargo doc
+        env:
+          RUSTFLAGS: "-D warnings"

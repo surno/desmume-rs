@@ -1,5 +1,5 @@
-use crate::ffi::*;
 use crate::DeSmuMEError;
+use desmume_sys::*;
 use std::marker::PhantomData;
 
 /// A window that displays the emulator and processes touchscreen and keyboard inputs
@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 ///
 /// This is meant to be a simple way to use and test the library, for intergration in custom UIs
 /// you probably want to process input and display manually.
-pub struct DeSmuMESdlWindow(PhantomData<()>);
+pub struct DeSmuMESdlWindow(PhantomData<*mut u8>);
 
 impl DeSmuMESdlWindow {
     pub(crate) fn new(

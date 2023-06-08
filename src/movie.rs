@@ -1,11 +1,11 @@
-pub use crate::ffi::SimpleDate;
-use crate::ffi::*;
 use crate::DeSmuMEError;
+pub use desmume_sys::SimpleDate;
+use desmume_sys::*;
 use std::ffi::{CStr, CString};
 use std::marker::PhantomData;
 
 /// Record and play movies.
-pub struct DeSmuMEMovie(pub(crate) PhantomData<()>);
+pub struct DeSmuMEMovie(pub(crate) PhantomData<*mut u8>);
 
 impl DeSmuMEMovie {
     /// Load a movie file from a file and play it back.

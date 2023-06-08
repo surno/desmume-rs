@@ -77,7 +77,6 @@ extern "C" {
 
     pub fn desmume_draw_raw_as_rgbx(buffer: *mut u8);
 
-    #[allow(unused)]
     pub fn desmume_savestate_clear();
 
     pub fn desmume_savestate_load(file_name: *const c_char) -> c_bool;
@@ -138,7 +137,6 @@ extern "C" {
 
     pub fn desmume_memory_register_exec(address: c_int, size: c_int, cb: MemoryCbFnc);
 
-    #[allow(unused)]
     pub fn desmume_screenshot(screenshot_buffer: *mut c_char);
 
     pub fn desmume_input_joy_init() -> c_bool;
@@ -183,7 +181,6 @@ extern "C" {
 
     pub fn desmume_movie_play(file_name: *const c_char) -> *const c_char;
 
-    #[allow(unused)]
     pub fn desmume_movie_record_simple(save_file_name: *const c_char, author_name: *const c_char);
 
     pub fn desmume_movie_record(
@@ -201,7 +198,6 @@ extern "C" {
         date: SimpleDate,
     );
 
-    #[allow(unused)]
     pub fn desmume_movie_replay();
 
     pub fn desmume_movie_stop();

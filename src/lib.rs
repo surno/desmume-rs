@@ -1,12 +1,13 @@
-use crate::ffi::*;
+use desmume_sys::*;
 use std::ffi::CString;
 use std::marker::PhantomData;
 use std::ptr::slice_from_raw_parts;
+use std::sync::atomic::{AtomicBool, Ordering};
+
 #[macro_use]
 mod macros;
 
 mod err;
-mod ffi;
 pub mod input;
 pub mod mem;
 mod movie;
@@ -20,8 +21,8 @@ pub use crate::movie::DeSmuMEMovie;
 pub use crate::savestate::DeSmuMESavestate;
 pub use crate::sdl_window::DeSmuMESdlWindow;
 
-static mut WAS_EVER_ALREADY_INITIALIZED: bool = false;
-static mut ALREADY_INITIALIZED: bool = false;
+static WAS_EVER_ALREADY_INITIALIZED: AtomicBool = AtomicBool::new(false);
+static ALREADY_INITIALIZED: AtomicBool = AtomicBool::new(false);
 pub const SCREEN_WIDTH: usize = GPU_FRAMEBUFFER_NATIVE_WIDTH;
 pub const SCREEN_HEIGHT: usize = GPU_FRAMEBUFFER_NATIVE_HEIGHT;
 pub const SCREEN_HEIGHT_BOTH: usize = SCREEN_HEIGHT * 2;
@@ -60,23 +61,25 @@ impl DeSmuME {
     ///     Additionally note that DeSmuME is not free'd at the moment when dropping it, this is
     ///     to allow future instances of DeSmuME being created again later on. Use [`free_desmume`]
     ///     to manually free resources created by the library.
-    pub fn init() -> Result<DeSmuME, DeSmuMEError> {
+    pub fn init() -> Result<Self, DeSmuMEError> {
+        // Since Self is not Send or Sync, we can use Relaxed ordering here.
+        if ALREADY_INITIALIZED.load(Ordering::Relaxed) {
+            return Err(DeSmuMEError::AlreadyInit);
+        }
+        ALREADY_INITIALIZED.store(true, Ordering::Relaxed);
         unsafe {
-            if ALREADY_INITIALIZED {
-                return Err(DeSmuMEError::AlreadyInit);
-            }
-            ALREADY_INITIALIZED = true;
             desmume_set_savetype(0);
-            if !WAS_EVER_ALREADY_INITIALIZED {
-                if desmume_init() < 0 {
-                    return Err(DeSmuMEError::FailedInit);
-                }
-                WAS_EVER_ALREADY_INITIALIZED = true;
+        }
+        if !WAS_EVER_ALREADY_INITIALIZED.load(Ordering::Relaxed) {
+            if unsafe { desmume_init() < 0 } {
+                return Err(DeSmuMEError::FailedInit);
             }
+            WAS_EVER_ALREADY_INITIALIZED.store(true, Ordering::Relaxed);
         }
         Ok(Self {
             input: DeSmuMEInput {
                 joystick_was_init: false,
+                _notsendsync: PhantomData,
             },
             memory: DeSmuMEMemory(PhantomData),
             movie: DeSmuMEMovie(PhantomData),
@@ -210,7 +213,7 @@ impl DeSmuME {
     /// Return the display buffer in the internal format.
     /// You probably want to use display_buffer_as_rgbx instead.
     pub fn display_buffer(&self) -> &[u16] {
-        unsafe { &*slice_from_raw_parts(desmume_draw_raw(), ffi::FRAMEBUFFER_SIZE) }
+        unsafe { &*slice_from_raw_parts(desmume_draw_raw(), FRAMEBUFFER_SIZE) }
     }
 
     /// Fill in the display buffer as RGBX color values,
@@ -268,13 +271,11 @@ impl DeSmuME {
 
 impl Drop for DeSmuME {
     fn drop(&mut self) {
-        unsafe {
-            // Freeing DeSmuME will prevent it from ever be used again. So at the moment we keep
-            // it around, in case it is needed again later. You can use free_desmume() to manually
-            // free it.
-            //desmume_free();
-            ALREADY_INITIALIZED = false;
-        }
+        // Freeing DeSmuME will prevent it from ever be used again. So at the moment we keep
+        // it around, in case it is needed again later. You can use free_desmume() to manually
+        // free it.
+        //desmume_free();
+        ALREADY_INITIALIZED.store(false, Ordering::Relaxed);
     }
 }
 

@@ -22,11 +22,8 @@ fn env(name: &str) -> Option<String> {
 fn main() {
     let target = env::var("TARGET").unwrap();
 
-    if cfg!(feature = "desmume-system") || env("DESMUME_SYSTEM").is_some() {
-        return;
-    }
-
-    let src = env::current_dir().unwrap();
+    let src_sys = env::current_dir().unwrap();
+    let src = src_sys.join("..");
     let build_dir = TempDir::new().unwrap();
     let build_dir = build_dir.path();
 
@@ -135,8 +132,6 @@ fn main() {
         if arch_targetname != "x64" {
             println!("cargo:rustc-link-arg=/SAFESEH:NO");
         }
-
-        println!("cargo:lib=static={}", dst.display());
     } else {
         // Meson based Linux/Mac build
         let mut cmd = Command::new("meson");
@@ -183,7 +178,6 @@ fn main() {
             println!("cargo:rustc-link-lib=stdc++");
         }
         println!("cargo:rustc-link-search={}", dst.display());
-        println!("cargo:lib=static={}", dst.display());
     }
 }
 

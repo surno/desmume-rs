@@ -1,11 +1,11 @@
-use crate::ffi::*;
 use crate::DeSmuMEError;
+use desmume_sys::*;
 use std::ffi::{CStr, CString};
 use std::marker::PhantomData;
 
 /// Load and save savestates. Either slots can be used  (maximum number of slots is in the
 /// constant `NB_STATES`), or savestates can be directly loaded from / saved to files.
-pub struct DeSmuMESavestate(pub(crate) PhantomData<()>);
+pub struct DeSmuMESavestate(pub(crate) PhantomData<*mut u8>);
 
 impl DeSmuMESavestate {
     /// Scan all savestate slots for if they exist or not.

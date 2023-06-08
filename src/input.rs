@@ -1,9 +1,11 @@
-use crate::ffi::*;
 use crate::DeSmuMEError;
+use desmume_sys::*;
+use std::marker::PhantomData;
 
 /// Manage input processing for the emulator.
 pub struct DeSmuMEInput {
     pub(crate) joystick_was_init: bool,
+    pub(crate) _notsendsync: PhantomData<*mut u8>,
 }
 
 impl DeSmuMEInput {

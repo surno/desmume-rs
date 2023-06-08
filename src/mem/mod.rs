@@ -1,10 +1,10 @@
 mod index;
 mod read;
 
-pub use crate::ffi::MemoryCbFnc;
-use crate::ffi::*;
 pub use crate::mem::index::{IndexMove, IndexSet};
 pub use crate::mem::read::{MemIndexWrapper, TypedMemoryAccessor};
+pub use desmume_sys::MemoryCbFnc;
+use desmume_sys::*;
 use std::ffi::CString;
 use std::marker::PhantomData;
 
@@ -104,7 +104,7 @@ impl TryFrom<u32> for Register {
 }
 
 /// Access and manipulate the memory of the emulator.
-pub struct DeSmuMEMemory(pub(crate) PhantomData<()>);
+pub struct DeSmuMEMemory(pub(crate) PhantomData<*mut u8>);
 
 impl DeSmuMEMemory {
     /// Allows reading the memory using a &\[u8]-like type. Please note that reading memory always copies.

@@ -1,5 +1,5 @@
-use crate::ffi::*;
 use crate::mem::{IndexMove, IndexSet};
+use desmume_sys::*;
 use std::marker::PhantomData;
 use std::ops::{
     Deref, DerefMut, Range, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,

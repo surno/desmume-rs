@@ -1,0 +1,20 @@
+[package]
+name = "desmume-sys"
+version = "0.0.1"
+authors = ["Marco 'Capypara' Köpcke <hello@capypara.de>"]
+edition = "2021"
+repository = "https://github.com/SkyTemple/desmume-rs"
+license = "GPL-3.0-or-later"
+description = "FFI for DeSmuME, the Nintendo DS emulator."
+links = "desmume"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+glob = "0.3"
+tempfile = "3.3"
+pkg-config = "0.3"
