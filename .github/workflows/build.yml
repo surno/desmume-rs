@@ -48,6 +48,10 @@ jobs:
           override: true
           default: true
 
+      # I don't know why but actions-rs seems to like not ACTUALLY setting the target
+      - name: Set target
+        run: rustup default stable-${{ matrix.target }}
+
       - name: Run cargo test
         run: cargo test
         env:
@@ -101,6 +105,10 @@ jobs:
           target: ${{ matrix.target }}
           override: true
           default: true
+
+      # I don't know why but actions-rs seems to like not ACTUALLY setting the target
+      - name: Set target
+        run: rustup default stable-${{ matrix.target }}
 
       - name: Build
         run: cargo build -vv --release

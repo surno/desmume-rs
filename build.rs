@@ -1,7 +1,8 @@
 use std::env;
+use std::error::Error;
 use std::fs;
 use std::io::ErrorKind;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use tempfile::TempDir;
 
@@ -66,36 +67,68 @@ fn main() {
         run(&mut cmd, "MSBuild");
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-        let lib_path = glob::glob(
-            build_dir
-                .join("src/frontend/interface/windows/__bins/*.lib")
-                .to_str()
-                .unwrap(),
+
+        windows_move_libs(
+            build_dir,
+            "src/frontend/interface/windows/__bins/*.lib",
+            &dst,
         )
-        .unwrap()
-        .next()
-        .unwrap()
         .unwrap();
-        let sdl_lib_path = glob::glob(
-            build_dir
-                .join(format!(
-                    "src/frontend/interface/windows/SDL/lib/{arch_dirname}/SDL2.lib"
-                ))
-                .to_str()
-                .unwrap(),
+        windows_move_libs(
+            build_dir,
+            "src/frontend/interface/windows/.libs/*.lib",
+            &dst,
         )
-        .unwrap()
-        .next()
-        .unwrap()
         .unwrap();
-        fs::copy(lib_path, dst.join("desmume.lib")).unwrap();
-        fs::copy(sdl_lib_path, dst.join("SDL2.lib")).unwrap();
+        windows_move_libs(
+            build_dir,
+            format!("src/frontend/interface/windows/.libs/{arch_targetname}/*.lib"),
+            &dst,
+        )
+        .unwrap();
+        windows_move_libs(
+            build_dir,
+            format!("src/frontend/interface/windows/SDL/lib/{arch_dirname}/*.lib"),
+            &dst,
+        )
+        .unwrap();
+        windows_move_libs(build_dir, "src/frontend/windows/zlib128/*.lib", &dst).unwrap();
+        windows_move_libs(build_dir, "src/frontend/windows/agg/*.lib", &dst).unwrap();
+
         println!(
             "cargo:rustc-link-search={}",
             dst.as_os_str().to_str().unwrap()
         );
-        println!("cargo:rustc-link-lib=static=desmume");
+
+        println!("cargo:rustc-link-lib=dylib=vfw32");
+        println!("cargo:rustc-link-lib=dylib=opengl32");
+        println!("cargo:rustc-link-lib=dylib=glu32");
+        println!("cargo:rustc-link-lib=dylib=ws2_32");
+        println!("cargo:rustc-link-lib=dylib=user32");
+        println!("cargo:rustc-link-lib=dylib=gdi32");
+        println!("cargo:rustc-link-lib=dylib=shell32");
+        println!("cargo:rustc-link-lib=dylib=comdlg32");
+        println!("cargo:rustc-link-lib=dylib=shlwapi");
+        println!("cargo:rustc-link-lib=dylib=comctl32");
+        println!("cargo:rustc-link-lib=dylib=winmm");
         println!("cargo:rustc-link-lib=static=SDL2");
+        if arch_targetname == "x64" {
+            println!("cargo:rustc-link-lib=static=agg-2.5-x64");
+            println!("cargo:rustc-link-lib=static=zlib-vc8-x64");
+        } else {
+            println!("cargo:rustc-link-lib=static=agg-2.5");
+            println!("cargo:rustc-link-lib=static=zlib-vc8-Win32");
+        }
+
+        let desmume_lib_name = glob::glob(dst.join("DeSmuME*").to_str().unwrap())
+            .unwrap()
+            .next()
+            .unwrap()
+            .unwrap();
+        fs::rename(desmume_lib_name, dst.join("desmume.lib")).unwrap();
+
+        println!("cargo:rustc-link-lib=static=desmume");
+
         println!("cargo:lib=static={}", dst.display());
     } else {
         // Meson based Linux/Mac build
@@ -169,4 +202,17 @@ fn run(cmd: &mut Command, program: &str) {
 
 fn fail(s: &str) -> ! {
     panic!("\n{}\n\nbuild script failed, must exit now", s)
+}
+
+fn windows_move_libs<P: AsRef<Path>>(
+    build_dir: &Path,
+    glob_pattern: P,
+    dst: &Path,
+) -> Result<(), Box<dyn Error>> {
+    let gl = glob::glob(build_dir.join(glob_pattern).to_str().unwrap())?;
+    for pathr in gl {
+        let path = pathr?;
+        fs::copy(&path, dst.join(path.file_name().unwrap()))?;
+    }
+    Ok(())
 }
