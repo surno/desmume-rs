@@ -34,7 +34,7 @@ fn main() {
     let mut cmd = Command::new("cp");
     cmd.current_dir(build_dir)
         .arg("-a")
-        .arg(&src.join("desmume/desmume/src"))
+        .arg(src.join("desmume/desmume/src"))
         .arg(build_dir);
     run(&mut cmd, "cp");
 
@@ -59,7 +59,7 @@ fn main() {
             .arg(format!("/p:configuration={}", config))
             .arg(format!("/p:Platform={}", arch_targetname))
             .arg("-property:ConfigurationType=StaticLibrary")
-            .current_dir(&build_dir.join("src/frontend/interface/windows"));
+            .current_dir(build_dir.join("src/frontend/interface/windows"));
         run(&mut cmd, "MSBuild");
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
@@ -137,21 +137,21 @@ fn main() {
         cmd.arg("build")
             .arg("--default-library=static")
             .arg("-Dbuildtype=release")
-            .current_dir(&build_dir.join("src/frontend/interface"));
+            .current_dir(build_dir.join("src/frontend/interface"));
         run(&mut cmd, "meson");
 
         let mut cmd = Command::new("ninja");
         cmd.arg("-C")
             .arg("build")
-            .current_dir(&build_dir.join("src/frontend/interface"));
+            .current_dir(build_dir.join("src/frontend/interface"));
         run(&mut cmd, "ninja");
 
         let dst = PathBuf::from(env::var_os("OUT_DIR").unwrap());
         let mut cmd = Command::new("cp");
         cmd.current_dir(build_dir)
             .arg("-r")
-            .arg(&build_dir.join("src/frontend/interface/build/libdesmume.a"))
-            .arg(&build_dir.join("src/frontend/interface/build/libdesmume.a.p"))
+            .arg(build_dir.join("src/frontend/interface/build/libdesmume.a"))
+            .arg(build_dir.join("src/frontend/interface/build/libdesmume.a.p"))
             .arg(&dst);
         run(&mut cmd, "cp");
 
@@ -169,11 +169,9 @@ fn main() {
         cfg.probe("zlib").unwrap();
         cfg.probe("soundtouch").ok();
         cfg.probe("openal").ok();
-        if cfg.probe("opengl").is_err() {
-            if target.contains("darwin") {
-                // Probing may fail under MacOS. Still try to link.
-                println!("cargo:rustc-link-lib=framework=OpenGL");
-            }
+        if cfg.probe("opengl").is_err() && target.contains("darwin") {
+            // Probing may fail under MacOS. Still try to link.
+            println!("cargo:rustc-link-lib=framework=OpenGL");
         }
         cfg.probe("alsa").ok();
 
