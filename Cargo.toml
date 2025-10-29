@@ -3,7 +3,7 @@ name = "desmume-rs"
 version = "0.1.3"
 authors = ["Marco 'Capypara' Köpcke <hello@capypara.de>"]
 edition = "2021"
-repository = "https://github.com/SkyTemple/desmume-rs"
+repository = "https://github.com/surno/desmume-rs"
 license = "GPL-3.0-or-later"
 description = "Rust bindings for DeSmuME, the Nintendo DS emulator."
 
@@ -14,5 +14,5 @@ members = [".", "desmume_sys"]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-desmume-sys = { path = "./desmume_sys", version = "0.1.2" }
+desmume-sys = { path = "./desmume_sys", version = "0.1.4" }
 thiserror = "2"
