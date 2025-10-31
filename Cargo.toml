@@ -14,5 +14,5 @@ members = [".", "desmume_sys"]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-desmume-sys = { path = "./desmume_sys", version = "0.1.4" }
+desmume-sys = { path = "./desmume_sys", version = "0.1.5" }
 thiserror = "2"
