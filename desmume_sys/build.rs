@@ -168,7 +168,12 @@ fn main() {
         }
         cfg.probe("zlib").unwrap();
         cfg.probe("soundtouch").ok();
-        cfg.probe("openal").ok();
+        if cfg.probe("openal").is_err() && target.contains("darwin") {
+            // OpenAL is a framework on macOS, not a pkg-config package
+            println!("cargo:rustc-link-lib=framework=OpenAL");
+        } else {
+            cfg.probe("openal").ok();
+        }
         if cfg.probe("opengl").is_err() && target.contains("darwin") {
             // Probing may fail under MacOS. Still try to link.
             println!("cargo:rustc-link-lib=framework=OpenGL");
