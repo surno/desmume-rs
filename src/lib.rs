@@ -41,26 +41,61 @@ pub enum Language {
     Spanish = 5,
 }
 
-/// Audio core identifiers for runtime selection
+/// Audio core identifiers for runtime selection.
+///
+/// These correspond to the `DESMUME_AUDIO_*` constants in the C interface.
 #[repr(C)]
 pub enum AudioCore {
+    /// No audio output (silent, no dependencies)
     Dummy = 0,
+    /// SDL audio backend (requires SDL build)
     SDL = 2,
 }
 
-/// 3D renderer identifiers
+/// 3D renderer identifiers.
+///
+/// These correspond to the `DESMUME_RENDERER_*` constants in the C interface
+/// and match `RENDERID_*` values from render3D.h.
 #[repr(C)]
 pub enum Renderer3D {
+    /// Null renderer (no 3D output)
     Null = 0,
+    /// Software rasterizer (default, works everywhere)
     SoftRasterizer = 1,
+    /// Metal renderer (macOS only, requires Metal support)
     Metal = 2000,
 }
 
-/// Initialization options for fine-grained control over DeSmuME startup
+/// Initialization options for fine-grained control over DeSmuME startup.
+///
+/// Use this with [`DeSmuME::init_with_options()`] to configure audio, renderer,
+/// and SDL subsystems at initialization time.
+///
+/// # Example
+///
+/// ```
+/// # fn main() -> Result<(), desmume_rs::DeSmuMEError> {
+/// use desmume_rs::{DeSmuME, InitOptions, AudioCore, Renderer3D};
+///
+/// // Configure with SDL audio and software rasterizer
+/// let options = InitOptions {
+///     audio_core: AudioCore::SDL,
+///     audio_buffer_size: Some(2940), // 735 samples * 4 bytes
+///     renderer_3d: Renderer3D::SoftRasterizer,
+///     init_sdl_timer: true,
+/// };
+/// let _emu = DeSmuME::init_with_options(options)?;
+/// # Ok(())
+/// # }
+/// ```
 pub struct InitOptions {
+    /// Audio core to use for sound output
     pub audio_core: AudioCore,
+    /// Audio buffer size in bytes (0 = default 2940 bytes)
     pub audio_buffer_size: Option<u32>,
+    /// 3D renderer to use for graphics
     pub renderer_3d: Renderer3D,
+    /// Whether to initialize SDL timer subsystem
     pub init_sdl_timer: bool,
 }
 
@@ -131,6 +166,7 @@ impl DeSmuME {
     /// # Example
     ///
     /// ```
+    /// # fn main() -> Result<(), desmume_rs::DeSmuMEError> {
     /// use desmume_rs::{DeSmuME, InitOptions, AudioCore, Renderer3D};
     ///
     /// let options = InitOptions {
@@ -139,8 +175,9 @@ impl DeSmuME {
     ///     renderer_3d: Renderer3D::SoftRasterizer,
     ///     init_sdl_timer: true,
     /// };
-    /// let emu = DeSmuME::init_with_options(options)?;
-    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// let _emu = DeSmuME::init_with_options(options)?;
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn init_with_options(options: InitOptions) -> Result<Self, DeSmuMEError> {
         if ALREADY_INITIALIZED.load(Ordering::Relaxed) {
@@ -381,10 +418,12 @@ impl DeSmuME {
     /// # Example
     ///
     /// ```
+    /// # fn main() -> Result<(), desmume_rs::DeSmuMEError> {
     /// # use desmume_rs::{DeSmuME, AudioCore};
     /// # let mut emu = DeSmuME::init()?;
     /// emu.audio_set_core(AudioCore::SDL, Some(2940))?;
-    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn audio_set_core(
         &mut self,
@@ -426,14 +465,16 @@ impl DeSmuME {
     /// # Example
     ///
     /// ```
+    /// # fn main() -> Result<(), desmume_rs::DeSmuMEError> {
     /// # #[cfg(target_os = "macos")]
     /// # {
     /// # use desmume_rs::DeSmuME;
     /// # let mut emu = DeSmuME::init()?;
-    /// if emu.has_metal() {
-    ///     emu.init_metal()?;
-    /// }
-    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// # if emu.has_metal() {
+    /// #     emu.init_metal()?;
+    /// # }
+    /// # }
+    /// # Ok(())
     /// # }
     /// ```
     #[cfg(target_os = "macos")]
@@ -460,10 +501,12 @@ impl DeSmuME {
     /// # Example
     ///
     /// ```
+    /// # fn main() -> Result<(), desmume_rs::DeSmuMEError> {
     /// # use desmume_rs::DeSmuME;
     /// # let mut emu = DeSmuME::init()?;
     /// emu.set_jit_enabled(true);
-    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn set_jit_enabled(&mut self, enabled: bool) {
         unsafe { desmume_sys::desmume_set_jit_enabled(enabled as c_bool) }
@@ -486,10 +529,12 @@ impl DeSmuME {
     /// # Example
     ///
     /// ```
+    /// # fn main() -> Result<(), desmume_rs::DeSmuMEError> {
     /// # use desmume_rs::DeSmuME;
     /// # let mut emu = DeSmuME::init()?;
     /// emu.set_jit_max_block_size(50);
-    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// # Ok(())
+    /// # }
     /// ```
     pub fn set_jit_max_block_size(&mut self, size: u32) {
         unsafe { desmume_sys::desmume_set_jit_max_block_size(size) }
