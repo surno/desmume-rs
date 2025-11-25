@@ -72,6 +72,8 @@ extern "C" {
 
     pub fn desmume_init_metal() -> c_int;
 
+    pub fn desmume_metal_bootstrap_init() -> c_int;
+
     pub fn desmume_has_metal() -> c_bool;
 
     pub fn desmume_get_jit_enabled() -> c_bool;

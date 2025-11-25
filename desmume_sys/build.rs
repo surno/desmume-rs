@@ -26,6 +26,9 @@ fn main() {
 
     let target = env::var("TARGET").unwrap();
 
+    // Rerun if meson.build changes
+    println!("cargo:rerun-if-changed=desmume/desmume/src/frontend/interface/meson.build");
+
     let src = env::current_dir().unwrap();
     let build_dir = TempDir::new().unwrap();
     let build_dir = build_dir.path();
@@ -136,8 +139,14 @@ fn main() {
         let mut cmd = Command::new("meson");
         cmd.arg("build")
             .arg("--default-library=static")
-            .arg("-Dbuildtype=release")
-            .current_dir(build_dir.join("src/frontend/interface"));
+            .arg("-Dbuildtype=release");
+
+        // Enable Metal renderer on macOS
+        if target.contains("darwin") {
+            cmd.arg("-Dmetal=true");
+        }
+
+        cmd.current_dir(build_dir.join("src/frontend/interface"));
         run(&mut cmd, "meson");
 
         let mut cmd = Command::new("ninja");
@@ -180,7 +189,10 @@ fn main() {
         }
         cfg.probe("alsa").ok();
 
+        // Link Metal and Foundation frameworks when Metal renderer is enabled
         if target.contains("darwin") {
+            println!("cargo:rustc-link-lib=framework=Metal");
+            println!("cargo:rustc-link-lib=framework=Foundation");
             println!("cargo:rustc-link-lib=c++");
         } else {
             println!("cargo:rustc-link-lib=stdc++");
