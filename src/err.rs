@@ -25,6 +25,12 @@ pub enum DeSmuMEError {
     JoystickNotInit,
     #[error("Failed to initialize the joystick controls.")]
     FailedInitJoystick,
+    #[error("Failed to initialize SDL subsystems")]
+    FailedSdlInit,
+    #[error("Failed to switch audio core")]
+    FailedAudioCoreSwitch,
+    #[error("Failed to initialize Metal renderer")]
+    FailedMetalInit,
     #[error("Null error while trying to convert string.")]
     NulError(#[source] NulError),
 }

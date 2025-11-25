@@ -5,6 +5,27 @@ pub type c_bool = c_int;
 
 pub type MemoryCbFnc = Option<extern "C" fn(addr: c_uint, size: c_int) -> c_bool>;
 
+#[repr(C)]
+pub enum DesmumeAudioCore {
+    Dummy = 0,
+    SDL = 2,
+}
+
+#[repr(C)]
+pub enum Desmume3DRenderer {
+    Null = 0,
+    SoftRasterizer = 1,
+    Metal = 2000,
+}
+
+#[repr(C)]
+pub struct DesmumeInitOptions {
+    pub audio_core: c_int,
+    pub audio_buffer_size: c_int,
+    pub renderer_3d: c_int,
+    pub init_sdl_timer: c_int,
+}
+
 #[repr(u32)]
 #[allow(clippy::upper_case_acronyms)]
 pub enum StartFrom {
@@ -40,6 +61,26 @@ extern "C" {
     pub fn desmume_init() -> c_int;
 
     pub fn desmume_free();
+
+    pub fn desmume_init_sdl() -> c_int;
+
+    pub fn desmume_init_with_options(options: *const DesmumeInitOptions) -> c_int;
+
+    pub fn desmume_audio_set_core(core_id: c_int, buffer_size: c_int) -> c_int;
+
+    pub fn desmume_audio_get_core() -> c_int;
+
+    pub fn desmume_init_metal() -> c_int;
+
+    pub fn desmume_has_metal() -> c_bool;
+
+    pub fn desmume_get_jit_enabled() -> c_bool;
+
+    pub fn desmume_set_jit_enabled(enabled: c_bool);
+
+    pub fn desmume_get_jit_max_block_size() -> u32;
+
+    pub fn desmume_set_jit_max_block_size(size: u32);
 
     pub fn desmume_set_language(language: u8);
 

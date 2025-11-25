@@ -41,6 +41,40 @@ pub enum Language {
     Spanish = 5,
 }
 
+/// Audio core identifiers for runtime selection
+#[repr(C)]
+pub enum AudioCore {
+    Dummy = 0,
+    SDL = 2,
+}
+
+/// 3D renderer identifiers
+#[repr(C)]
+pub enum Renderer3D {
+    Null = 0,
+    SoftRasterizer = 1,
+    Metal = 2000,
+}
+
+/// Initialization options for fine-grained control over DeSmuME startup
+pub struct InitOptions {
+    pub audio_core: AudioCore,
+    pub audio_buffer_size: Option<u32>,
+    pub renderer_3d: Renderer3D,
+    pub init_sdl_timer: bool,
+}
+
+impl Default for InitOptions {
+    fn default() -> Self {
+        Self {
+            audio_core: AudioCore::Dummy,
+            audio_buffer_size: None,
+            renderer_3d: Renderer3D::SoftRasterizer,
+            init_sdl_timer: false,
+        }
+    }
+}
+
 /// The DeSmuME emulator.
 pub struct DeSmuME {
     input: DeSmuMEInput,
@@ -86,6 +120,71 @@ impl DeSmuME {
             savestate: DeSmuMESavestate(PhantomData),
             window: None,
         })
+    }
+
+    /// Initializes DeSmuME with explicit options for full control.
+    ///
+    /// This method allows fine-grained control over audio core, 3D renderer,
+    /// and SDL timer initialization. Use this instead of [`init()`] when you
+    /// need specific configuration.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// use desmume_rs::{DeSmuME, InitOptions, AudioCore, Renderer3D};
+    ///
+    /// let options = InitOptions {
+    ///     audio_core: AudioCore::SDL,
+    ///     audio_buffer_size: Some(2940),
+    ///     renderer_3d: Renderer3D::SoftRasterizer,
+    ///     init_sdl_timer: true,
+    /// };
+    /// let emu = DeSmuME::init_with_options(options)?;
+    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// ```
+    pub fn init_with_options(options: InitOptions) -> Result<Self, DeSmuMEError> {
+        if ALREADY_INITIALIZED.load(Ordering::Relaxed) {
+            return Err(DeSmuMEError::AlreadyInit);
+        }
+        ALREADY_INITIALIZED.store(true, Ordering::Relaxed);
+
+        let c_options = desmume_sys::DesmumeInitOptions {
+            audio_core: options.audio_core as c_int,
+            audio_buffer_size: options.audio_buffer_size.unwrap_or(0) as c_int,
+            renderer_3d: options.renderer_3d as c_int,
+            init_sdl_timer: options.init_sdl_timer as c_int,
+        };
+
+        if unsafe { desmume_sys::desmume_init_with_options(&c_options) < 0 } {
+            return Err(DeSmuMEError::FailedInit);
+        }
+        WAS_EVER_ALREADY_INITIALIZED.store(true, Ordering::Relaxed);
+
+        Ok(Self {
+            input: DeSmuMEInput {
+                joystick_was_init: false,
+                _notsendsync: PhantomData,
+            },
+            memory: DeSmuMEMemory(PhantomData),
+            movie: DeSmuMEMovie(PhantomData),
+            savestate: DeSmuMESavestate(PhantomData),
+            window: None,
+        })
+    }
+
+    /// Initialize SDL timer subsystem.
+    ///
+    /// Call this after [`init()`] if you need SDL timer functionality
+    /// but didn't initialize it during startup.
+    ///
+    /// # Errors
+    ///
+    /// Returns `FailedSdlInit` if SDL timer initialization fails.
+    pub fn init_sdl_timer(&mut self) -> Result<(), DeSmuMEError> {
+        if unsafe { desmume_sys::desmume_init_sdl() < 0 } {
+            return Err(DeSmuMEError::FailedSdlInit);
+        }
+        Ok(())
     }
 
     pub fn input(&self) -> &DeSmuMEInput {
@@ -266,6 +365,134 @@ impl DeSmuME {
     /// Get the current display status of the specified layer on the main GPU.
     pub fn gpu_set_layer_sub_enable_state(&self, layer_index: u8, state: bool) {
         unsafe { desmume_gpu_set_layer_sub_enable_state(layer_index as c_int, state as c_bool) }
+    }
+
+    /// Set the audio core at runtime.
+    ///
+    /// # Arguments
+    ///
+    /// * `core` - The audio core to use (Dummy or SDL)
+    /// * `buffer_size` - Optional buffer size in bytes. If `None`, uses default (2940 bytes)
+    ///
+    /// # Errors
+    ///
+    /// Returns `FailedAudioCoreSwitch` if the audio core cannot be switched.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use desmume_rs::{DeSmuME, AudioCore};
+    /// # let mut emu = DeSmuME::init()?;
+    /// emu.audio_set_core(AudioCore::SDL, Some(2940))?;
+    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// ```
+    pub fn audio_set_core(
+        &mut self,
+        core: AudioCore,
+        buffer_size: Option<u32>,
+    ) -> Result<(), DeSmuMEError> {
+        let buf = buffer_size.unwrap_or(0) as c_int;
+        if unsafe { desmume_sys::desmume_audio_set_core(core as c_int, buf) < 0 } {
+            return Err(DeSmuMEError::FailedAudioCoreSwitch);
+        }
+        Ok(())
+    }
+
+    /// Get the currently active audio core.
+    pub fn audio_get_core(&self) -> AudioCore {
+        match unsafe { desmume_sys::desmume_audio_get_core() } {
+            2 => AudioCore::SDL,
+            _ => AudioCore::Dummy,
+        }
+    }
+
+    /// Check if Metal renderer is available (macOS only).
+    ///
+    /// Returns `false` on non-macOS platforms.
+    #[cfg(target_os = "macos")]
+    pub fn has_metal(&self) -> bool {
+        unsafe { desmume_sys::desmume_has_metal() > 0 }
+    }
+
+    /// Initialize Metal renderer (macOS only).
+    ///
+    /// This will attempt to switch the 3D renderer to Metal. If Metal initialization
+    /// fails, the renderer will fall back to software rasterizer.
+    ///
+    /// # Errors
+    ///
+    /// Returns `FailedMetalInit` if Metal renderer cannot be initialized.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # #[cfg(target_os = "macos")]
+    /// # {
+    /// # use desmume_rs::DeSmuME;
+    /// # let mut emu = DeSmuME::init()?;
+    /// if emu.has_metal() {
+    ///     emu.init_metal()?;
+    /// }
+    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// # }
+    /// ```
+    #[cfg(target_os = "macos")]
+    pub fn init_metal(&mut self) -> Result<(), DeSmuMEError> {
+        if unsafe { desmume_sys::desmume_init_metal() < 0 } {
+            return Err(DeSmuMEError::FailedMetalInit);
+        }
+        Ok(())
+    }
+
+    /// Check if JIT (Just-In-Time compilation) is currently enabled.
+    ///
+    /// JIT can significantly improve emulation performance but may not be
+    /// available on all platforms.
+    pub fn jit_enabled(&self) -> bool {
+        unsafe { desmume_sys::desmume_get_jit_enabled() > 0 }
+    }
+
+    /// Enable or disable JIT (Just-In-Time compilation).
+    ///
+    /// JIT can significantly improve emulation performance but may not be
+    /// available on all platforms. Changes take effect immediately.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use desmume_rs::DeSmuME;
+    /// # let mut emu = DeSmuME::init()?;
+    /// emu.set_jit_enabled(true);
+    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// ```
+    pub fn set_jit_enabled(&mut self, enabled: bool) {
+        unsafe { desmume_sys::desmume_set_jit_enabled(enabled as c_bool) }
+    }
+
+    /// Get the maximum JIT block size.
+    ///
+    /// This controls how large code blocks the JIT compiler will process.
+    /// Valid range is 1-100.
+    pub fn jit_max_block_size(&self) -> u32 {
+        unsafe { desmume_sys::desmume_get_jit_max_block_size() }
+    }
+
+    /// Set the maximum JIT block size.
+    ///
+    /// This controls how large code blocks the JIT compiler will process.
+    /// Valid range is 1-100. If JIT is currently enabled, it will be reset
+    /// to apply the new block size.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use desmume_rs::DeSmuME;
+    /// # let mut emu = DeSmuME::init()?;
+    /// emu.set_jit_max_block_size(50);
+    /// # Ok::<(), desmume_rs::DeSmuMEError>(())
+    /// ```
+    pub fn set_jit_max_block_size(&mut self, size: u32) {
+        unsafe { desmume_sys::desmume_set_jit_max_block_size(size) }
     }
 }
 
