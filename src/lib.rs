@@ -119,6 +119,12 @@ pub struct DeSmuME {
     window: Option<DeSmuMESdlWindow>,
 }
 
+// SAFETY: DeSmuME is marked as !Send in the original code, but after initialization,
+// the emulator state is only accessed from a single thread (the emulator thread).
+// The underlying C++ code is thread-safe for single-threaded access patterns.
+// This unsafe Send impl allows moving the initialized DeSmuME instance to the emulator thread.
+unsafe impl Send for DeSmuME {}
+
 impl DeSmuME {
     /// Initializes DeSmuME and returns the struct managing it's state.
     ///
@@ -479,6 +485,30 @@ impl DeSmuME {
     /// ```
     #[cfg(target_os = "macos")]
     pub fn init_metal(&mut self) -> Result<(), DeSmuMEError> {
+        use desmume_sys::metal_resources;
+        use desmume_sys::desmume_metal_bootstrap_init_with_data;
+        
+        // Try to use embedded library data first
+        let library_data = metal_resources::get_metal_library();
+        if !library_data.is_empty() {
+            let result = unsafe {
+                desmume_metal_bootstrap_init_with_data(
+                    library_data.as_ptr(),
+                    library_data.len()
+                )
+            };
+            
+            if result == 0 {
+                // Bootstrap succeeded with embedded data, now switch renderer
+                // desmume_init_metal() will see bootstrap is already done and just switch renderers
+                if unsafe { desmume_sys::desmume_init_metal() < 0 } {
+                    return Err(DeSmuMEError::FailedMetalInit);
+                }
+                return Ok(());
+            }
+        }
+        
+        // Fallback to file-based initialization if embedding failed or data is empty
         if unsafe { desmume_sys::desmume_init_metal() < 0 } {
             return Err(DeSmuMEError::FailedMetalInit);
         }

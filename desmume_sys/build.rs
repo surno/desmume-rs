@@ -29,6 +29,12 @@ fn main() {
     // Rerun if meson.build changes
     println!("cargo:rerun-if-changed=desmume/desmume/src/frontend/interface/meson.build");
 
+    // Rerun if modified source files change
+    println!("cargo:rerun-if-changed=desmume/desmume/src/GPU.cpp");
+    println!("cargo:rerun-if-changed=desmume/desmume/src/MetalRender.mm");
+    println!("cargo:rerun-if-changed=desmume/desmume/src/frontend/interface/interface.cpp");
+    println!("cargo:rerun-if-changed=desmume/desmume/src/frontend/interface/metal_bootstrap.mm");
+
     let src = env::current_dir().unwrap();
     let build_dir = TempDir::new().unwrap();
     let build_dir = build_dir.path();
@@ -163,6 +169,24 @@ fn main() {
             .arg(build_dir.join("src/frontend/interface/build/libdesmume.a.p"))
             .arg(&dst);
         run(&mut cmd, "cp");
+
+        // Copy Metal shader library if it exists (for macOS Metal renderer)
+        if target.contains("darwin") {
+            let metallib_path = build_dir.join("src/frontend/interface/build/default.metallib");
+            if metallib_path.exists() {
+                let mut cmd = Command::new("cp");
+                cmd.current_dir(build_dir)
+                    .arg(&metallib_path)
+                    .arg(&dst);
+                run(&mut cmd, "cp metallib");
+            } else {
+                // Create an empty file as a placeholder to allow compilation
+                // The runtime code will fall back to file-based loading
+                std::fs::write(dst.join("default.metallib"), b"").unwrap_or_else(|e| {
+                    panic!("Failed to create placeholder metallib: {}", e);
+                });
+            }
+        }
 
         let cfg = pkg_config::Config::new();
         cfg.probe("glib-2.0").unwrap();

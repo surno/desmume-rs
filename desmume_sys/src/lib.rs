@@ -1,5 +1,8 @@
 pub use libc::{c_char, c_int, c_long, c_schar, c_short, c_uchar, c_uint, c_ulong, c_ushort};
 
+#[cfg(target_os = "macos")]
+pub mod metal_resources;
+
 #[allow(non_camel_case_types)]
 pub type c_bool = c_int;
 
@@ -73,6 +76,13 @@ extern "C" {
     pub fn desmume_init_metal() -> c_int;
 
     pub fn desmume_metal_bootstrap_init() -> c_int;
+
+    #[cfg(target_os = "macos")]
+    /// Initialize Metal with embedded library data
+    /// data: pointer to metallib bytes
+    /// len: length of data in bytes
+    /// Returns: 0 on success, -1 on failure
+    pub fn desmume_metal_bootstrap_init_with_data(data: *const u8, len: usize) -> c_int;
 
     pub fn desmume_has_metal() -> c_bool;
 
